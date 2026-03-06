@@ -1,0 +1,39 @@
+name: Generate Monthly Lunch Calendar
+
+on:
+  # Run on the 25th of every month at 8am PT (to catch the next month's menu before it starts)
+  schedule:
+    - cron: '0 16 25 * *'  # 16:00 UTC = 8:00 AM PST / 9:00 AM PDT
+
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Needed to commit the updated ICS and menu ID files
+
+jobs:
+  generate-calendar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run menu fetcher
+        run: python fetch_menu.py
+
+      - name: Commit and push updated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/lunch.ics current_menu_id.txt
+          git diff --staged --quiet || git commit -m "Update lunch calendar for $(date +'%B %Y')"
+          git push
