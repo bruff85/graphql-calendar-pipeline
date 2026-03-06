@@ -1,15 +1,22 @@
 name: Generate Monthly Lunch Calendar
 
 on:
-  # Run on the 25th of every month at 8am PT (to catch the next month's menu before it starts)
+  # End of month runs (last day varies by month)
   schedule:
-    - cron: '0 16 25 * *'  # 16:00 UTC = 8:00 AM PST / 9:00 AM PDT
+    - cron: '0 16 28 * *'   # Covers February (8am PT)
+    - cron: '0 16 30 * *'   # Covers 30-day months
+    - cron: '0 16 31 * *'   # Covers 31-day months
+    # Early-month retries in case school posts the menu late
+    - cron: '0 16 1 * *'    # 1st of month
+    - cron: '0 16 3 * *'    # 3rd of month
+    - cron: '0 16 5 * *'    # 5th of month
+    - cron: '0 16 7 * *'    # 7th of month
 
   # Allow manual trigger from the GitHub Actions tab
   workflow_dispatch:
 
 permissions:
-  contents: write  # Needed to commit the updated ICS and menu ID files
+  contents: write
 
 jobs:
   generate-calendar:
