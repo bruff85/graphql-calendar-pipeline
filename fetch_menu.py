@@ -1,40 +1,36 @@
 #!/usr/bin/env python3
 """
 LCUSD Elementary School Lunch Calendar Generator
-Fetches the monthly lunch menu from the School Nutrition and Fitness GraphQL API
-and generates an ICS file with one all-day event per school day.
+
+Schedule: Runs on the last day of each month AND as a retry on the
+1st, 3rd, 5th, and 7th of each month to catch late API publishing.
+
+Logic:
+  1. Try nextMonthPublished from the API chain (fastest)
+  2. If null, scrape the LCUSD nutrition site for next month's menu ID
+  3. If not published yet, keep current month's ICS and exit cleanly
+  4. Only commit if menu data actually changed
 """
 
-import json
+import hashlib
 import uuid
+import re
 import requests
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import os
 
 # ─────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────
 GRAPHQL_URL = "https://api.schoolnutritionandfitness.com/graphql"
-SITE_ID = "24701"
-
-# The current month's menu ID. The script will auto-discover next month's ID
-# from the API response and save it for the next run.
+LCUSD_MENU_URL = "https://nutrition.lcusd.net/index.php?sid=2506080150154913&page=menus&sm={month}&sy={year}"
+SEED_MENU_ID = "698b7e94cc6f3104111f19e7"
 MENU_ID_FILE = "current_menu_id.txt"
-FALLBACK_MENU_ID = "698b7e94cc6f3104111f19e7"  # March 2026 — update if needed
-
-# Categories to EXCLUDE from the event title (ancillary items, sides, condiments)
-# Edit this list to filter out items you don't want shown on the calendar
+OUTPUT_ICS = "docs/lunch.ics"
 EXCLUDE_CATEGORIES = {"Milk", "Condiment", "Extra"}
 
-# Output ICS file path
-OUTPUT_ICS = "docs/lunch.ics"
-
-# ─────────────────────────────────────────────
-# GRAPHQL QUERY
-# ─────────────────────────────────────────────
 QUERY = """
 {
-    s0: site(depth: 0, id: "%s") { id name }
     menu(id: "%s") {
         id
         month
@@ -51,137 +47,155 @@ QUERY = """
             }
         }
         nextMonthPublished { id }
+        previousMonthPublished { id }
     }
 }
 """
 
 
-def get_menu_id():
-    """Load menu ID from file, or fall back to hardcoded value."""
+def get_current_menu_id():
     if os.path.exists(MENU_ID_FILE):
         with open(MENU_ID_FILE, "r") as f:
             menu_id = f.read().strip()
             if menu_id:
-                print(f"Using menu ID from file: {menu_id}")
                 return menu_id
-    print(f"Using fallback menu ID: {FALLBACK_MENU_ID}")
-    return FALLBACK_MENU_ID
+    return SEED_MENU_ID
 
 
-def save_next_menu_id(next_id):
-    """Save the next month's menu ID for the next scheduled run."""
-    if next_id:
-        with open(MENU_ID_FILE, "w") as f:
-            f.write(next_id)
-        print(f"Saved next month's menu ID: {next_id}")
+def save_menu_id(menu_id):
+    with open(MENU_ID_FILE, "w") as f:
+        f.write(menu_id)
 
 
 def fetch_menu(menu_id):
-    """Fetch menu data from the GraphQL API."""
-    query = QUERY % (SITE_ID, menu_id)
     response = requests.post(
         GRAPHQL_URL,
-        json={"query": query},
+        json={"query": QUERY % menu_id},
         headers={"Content-Type": "application/json"},
         timeout=30
     )
     response.raise_for_status()
     data = response.json()
-
     if "errors" in data:
         raise ValueError(f"GraphQL errors: {data['errors']}")
-
     return data["data"]["menu"]
 
 
-def build_daily_menu(menu_data):
+def scrape_menu_id_from_website(month, year):
     """
-    Group menu items by day, filtering out hidden/excluded items.
-    Returns a dict: { date_obj: [item_name, ...] }
+    Scrape the LCUSD nutrition site to find the menu ID for a given month/year.
+    Looks for the 'Lunch Menu' link which contains the menu ID in its href.
+    Returns the menu ID string if found, or None if not published yet.
     """
-    daily = {}
+    url = LCUSD_MENU_URL.format(month=month, year=year)
+    print(f"  Scraping LCUSD site for {month}/{year}: {url}")
 
+    try:
+        response = requests.get(url, timeout=30, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; LunchCalendarBot/1.0)"
+        })
+        response.raise_for_status()
+        html = response.text
+
+        # Check if the page says no menus published
+        if "No menus published for this month" in html:
+            print(f"  Site confirms: no menus published for {month}/{year} yet.")
+            return None
+
+        # Look for the Lunch Menu link containing the menu ID
+        # Pattern: href contains webmenus2 URL with id= parameter
+        # e.g. href="https://www.schoolnutritionandfitness.com/webmenus2/#/view?id=698b7e94cc6f3104111f19e7&siteCode=24701"
+        patterns = [
+            r'webmenus2[^"]*id=([a-f0-9]{24})[^"]*siteCode=24701[^"]*"[^>]*>(?:[^<]*<[^>]+>)*[^<]*Lunch Menu',
+            r'id=([a-f0-9]{24})[^"]*siteCode=24701',
+            r'open\?id=([a-f0-9]{24})',
+        ]
+
+        for pattern in patterns:
+            matches = re.findall(pattern, html, re.IGNORECASE)
+            if matches:
+                menu_id = matches[0]
+                print(f"  Found menu ID from website: {menu_id}")
+                return menu_id
+
+        print(f"  Could not extract menu ID from page HTML.")
+        return None
+
+    except requests.RequestException as e:
+        print(f"  Website scrape failed: {e}")
+        return None
+
+
+def get_next_month(month, year):
+    """Return (month, year) for the month after the given one."""
+    if month == 12:
+        return 1, year + 1
+    return month + 1, year
+
+
+def is_last_day_of_month(today):
+    tomorrow = today + timedelta(days=1)
+    return tomorrow.month != today.month
+
+
+def is_early_month_retry(today):
+    """Returns True if today is one of our retry days (1st, 3rd, 5th, 7th)."""
+    return today.day in {1, 3, 5, 7}
+
+
+def build_daily_menu(menu_data):
+    daily = {}
     for item in menu_data["items"]:
-        # Skip hidden items
         if item.get("hidden"):
             continue
-
         product = item.get("product")
         if not product:
             continue
-
-        # Skip items hidden on calendars
         if product.get("hide_on_calendars"):
             continue
-
-        # Skip excluded categories
-        category = product.get("category", "") or ""
+        category = product.get("category") or ""
         if category in EXCLUDE_CATEGORIES:
             continue
-
         name = (product.get("name") or "").strip()
         if not name:
             continue
-
-        # Determine the date for this item
         day = item.get("day")
         month = item.get("month") or menu_data["month"]
         year = item.get("year") or menu_data["year"]
-
         if not all([day, month, year]):
             continue
-
         try:
             day_date = date(int(year), int(month), int(day))
         except ValueError:
             continue
-
-        # Skip weekends
         if day_date.weekday() >= 5:
             continue
-
         if day_date not in daily:
             daily[day_date] = []
-
         if name not in daily[day_date]:
             daily[day_date].append(name)
-
     return daily
 
 
-def format_event_title(items):
-    """Format the list of menu items into a clean event title."""
-    if not items:
-        return "Lunch Menu"
-    return " | ".join(items)
-
-
 def generate_ics(daily_menu, month, year):
-    """Generate ICS file content from the daily menu dict."""
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-
+    month_label = datetime(year, month, 1).strftime("%B %Y")
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
         "PRODID:-//LCUSD Elementary Lunch//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        f"X-WR-CALNAME:LCUSD Elementary Lunch {datetime(year, month, 1).strftime('%B %Y')}",
+        f"X-WR-CALNAME:LCUSD Elementary Lunch {month_label}",
         "X-WR-TIMEZONE:America/Los_Angeles",
         "X-PUBLISHED-TTL:PT4H",
     ]
-
     for day_date in sorted(daily_menu.keys()):
         items = daily_menu[day_date]
-        title = format_event_title(items)
+        title = " | ".join(items) if items else "Lunch Menu"
         date_str = day_date.strftime("%Y%m%d")
-        # All-day event: DTEND is the next day
-        next_day = date(day_date.year, day_date.month, day_date.day)
-        from datetime import timedelta
-        end_date = (next_day + timedelta(days=1)).strftime("%Y%m%d")
-
+        end_date = (day_date + timedelta(days=1)).strftime("%Y%m%d")
         uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"lcusd-lunch-{date_str}"))
-
         lines += [
             "BEGIN:VEVENT",
             f"UID:{uid}",
@@ -193,9 +207,15 @@ def generate_ics(daily_menu, month, year):
             "TRANSP:TRANSPARENT",
             "END:VEVENT",
         ]
-
     lines.append("END:VCALENDAR")
     return "\r\n".join(lines)
+
+
+def file_hash(filepath):
+    if not os.path.exists(filepath):
+        return ""
+    with open(filepath, "r", encoding="utf-8") as f:
+        return hashlib.md5(f.read().encode()).hexdigest()
 
 
 def main():
@@ -203,40 +223,94 @@ def main():
     print("LCUSD Elementary Lunch Calendar Generator")
     print("=" * 50)
 
-    # Get the current menu ID
-    menu_id = get_menu_id()
+    today = date.today()
+    print(f"Today: {today}")
 
-    # Fetch menu from API
-    print(f"Fetching menu data...")
-    menu_data = fetch_menu(menu_id)
+    # Determine if we should run today
+    last_day = is_last_day_of_month(today)
+    early_retry = is_early_month_retry(today)
 
-    month = menu_data["month"]
-    year = menu_data["year"]
-    month_label = datetime(year, month, 1).strftime("%B %Y")
-    print(f"Menu loaded: {month_label}")
+    if not last_day and not early_retry:
+        print(f"Today (day {today.day}) is not a scheduled run day. Skipping.")
+        return
 
-    # Save next month's ID for next run
-    next_month = menu_data.get("nextMonthPublished")
-    if next_month and next_month.get("id"):
-        save_next_menu_id(next_month["id"])
+    if last_day:
+        print("Running end-of-month update — looking for next month's menu...")
+        target_month, target_year = get_next_month(today.month, today.year)
     else:
-        print("Note: No next month menu published yet.")
+        print(f"Running early-month retry (day {today.day}) — checking if next month's menu is published yet...")
+        target_month, target_year = today.month, today.year
 
-    # Build daily menu
-    daily_menu = build_daily_menu(menu_data)
-    print(f"Found menu items for {len(daily_menu)} school days")
+    target_label = datetime(target_year, target_month, 1).strftime("%B %Y")
+    print(f"Target month: {target_label}")
 
-    # Generate ICS
+    # ── Step 1: Try the API chain ──────────────────────────
+    current_id = get_current_menu_id()
+    print(f"\nStep 1: Checking API chain from menu ID: {current_id}")
+    current_menu = fetch_menu(current_id)
+    print(f"  Current menu in file: {current_menu['month']}/{current_menu['year']}")
+
+    target_menu = None
+
+    # Check if current menu is already the target month
+    if current_menu["month"] == target_month and current_menu["year"] == target_year:
+        print(f"  Current menu is already {target_label}.")
+        target_menu = current_menu
+    else:
+        next_info = current_menu.get("nextMonthPublished")
+        if next_info:
+            candidate = fetch_menu(next_info["id"])
+            if candidate["month"] == target_month and candidate["year"] == target_year:
+                print(f"  Found via API nextMonthPublished!")
+                target_menu = candidate
+            else:
+                print(f"  nextMonthPublished exists but is {candidate['month']}/{candidate['year']}, not target.")
+
+    # ── Step 2: Scrape LCUSD website as fallback ───────────
+    if not target_menu:
+        print(f"\nStep 2: API didn't have {target_label} — scraping LCUSD website...")
+        scraped_id = scrape_menu_id_from_website(target_month, target_year)
+        if scraped_id:
+            try:
+                candidate = fetch_menu(scraped_id)
+                if candidate["month"] == target_month and candidate["year"] == target_year:
+                    print(f"  Found via website scrape!")
+                    target_menu = candidate
+                else:
+                    print(f"  Scraped ID returned wrong month: {candidate['month']}/{candidate['year']}")
+            except Exception as e:
+                print(f"  Failed to fetch scraped menu ID: {e}")
+
+    # ── Step 3: Give up gracefully ─────────────────────────
+    if not target_menu:
+        print(f"\n{target_label} menu not available yet — keeping existing ICS unchanged.")
+        print("Will retry on the next scheduled run day.")
+        return
+
+    # ── Generate and save ICS ──────────────────────────────
+    month = target_menu["month"]
+    year = target_menu["year"]
+    print(f"\nGenerating ICS for: {datetime(year, month, 1).strftime('%B %Y')}")
+
+    save_menu_id(target_menu["id"])
+
+    daily_menu = build_daily_menu(target_menu)
+    print(f"Menu items found for {len(daily_menu)} school days")
+
     ics_content = generate_ics(daily_menu, month, year)
 
-    # Write output
     os.makedirs("docs", exist_ok=True)
-    with open(OUTPUT_ICS, "w", encoding="utf-8") as f:
-        f.write(ics_content)
+    old_hash = file_hash(OUTPUT_ICS)
+    new_hash = hashlib.md5(ics_content.encode()).hexdigest()
 
-    print(f"ICS file written to: {OUTPUT_ICS}")
-    print(f"Events generated: {len(daily_menu)}")
-    print("Done! ✅")
+    if old_hash == new_hash:
+        print("No changes detected — ICS file is already up to date.")
+    else:
+        with open(OUTPUT_ICS, "w", encoding="utf-8") as f:
+            f.write(ics_content)
+        print(f"ICS file updated with {len(daily_menu)} events.")
+
+    print("\nDone! ✅")
 
 
 if __name__ == "__main__":
