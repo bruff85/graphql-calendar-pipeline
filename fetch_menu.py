@@ -226,19 +226,24 @@ def main():
     today = date.today()
     print(f"Today: {today}")
 
-    # Determine if we should run today
+    # FORCE_RUN=true is set by the workflow when triggered manually
+    force_run = os.environ.get("FORCE_RUN", "false").lower() == "true"
     last_day = is_last_day_of_month(today)
     early_retry = is_early_month_retry(today)
 
-    if not last_day and not early_retry:
+    if not last_day and not early_retry and not force_run:
         print(f"Today (day {today.day}) is not a scheduled run day. Skipping.")
+        print("Tip: Use 'Run workflow' in GitHub Actions to force a run anytime.")
         return
+
+    if force_run:
+        print("Manual trigger detected — forcing run regardless of date.")
 
     if last_day:
         print("Running end-of-month update — looking for next month's menu...")
         target_month, target_year = get_next_month(today.month, today.year)
     else:
-        print(f"Running early-month retry (day {today.day}) — checking if next month's menu is published yet...")
+        print(f"Targeting current month: {today.month}/{today.year}")
         target_month, target_year = today.month, today.year
 
     target_label = datetime(target_year, target_month, 1).strftime("%B %Y")
