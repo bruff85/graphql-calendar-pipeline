@@ -119,7 +119,7 @@ def build_daily_menu(menu_data):
         if category in EXCLUDE_CATEGORIES:
             continue
 
-        name = product.get("name", "").strip()
+        name = (product.get("name") or "").strip()
         if not name:
             continue
 
