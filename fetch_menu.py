@@ -194,14 +194,13 @@ def generate_ics(daily_menu, month, year):
         items = daily_menu[day_date]
         title = " | ".join(items) if items else "Lunch Menu"
         date_str = day_date.strftime("%Y%m%d")
-        end_date = (day_date + timedelta(days=1)).strftime("%Y%m%d")
         uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"lcusd-lunch-{date_str}"))
         lines += [
             "BEGIN:VEVENT",
             f"UID:{uid}",
             f"DTSTAMP:{now}",
-            f"DTSTART;VALUE=DATE:{date_str}",
-            f"DTEND;VALUE=DATE:{end_date}",
+            f"DTSTART;TZID=America/Los_Angeles:{date_str}T113000",
+            f"DTEND;TZID=America/Los_Angeles:{date_str}T123000",
             f"SUMMARY:{title}",
             "DESCRIPTION:LCUSD Elementary School Lunch Menu",
             "TRANSP:TRANSPARENT",
