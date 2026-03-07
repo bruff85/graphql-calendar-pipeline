@@ -271,6 +271,19 @@ def main():
             else:
                 print(f"  nextMonthPublished exists but is {candidate['month']}/{candidate['year']}, not target.")
 
+        # If API month field is wrong but items exist, trust today's date
+        # The school sometimes updates menu content without updating the month field
+        if not target_menu and not next_info:
+            print(f"  API month field says {current_menu['month']}/{current_menu['year']} but no next month exists.")
+            print(f"  Checking if current menu items match target month {target_month}/{target_year}...")
+            item_days = set(item.get("day") for item in current_menu["items"] if item.get("day"))
+            if item_days:
+                print(f"  Menu has items for days: {sorted(item_days)[:5]}... — treating as {target_label}")
+                # Override the month/year so ICS is generated for the correct month
+                current_menu["month"] = target_month
+                current_menu["year"] = target_year
+                target_menu = current_menu
+
     # ── Step 2: Scrape LCUSD website as fallback ───────────
     if not target_menu:
         print(f"\nStep 2: API didn't have {target_label} — scraping LCUSD website...")
