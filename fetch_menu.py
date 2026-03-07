@@ -186,7 +186,7 @@ def generate_ics(daily_menu, month, year):
         "PRODID:-//LCUSD Elementary Lunch//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        f"X-WR-CALNAME:LCUSD Elementary Lunch {month_label}",
+        "X-WR-CALNAME:LCE AI Lunch Calendar",
         "X-WR-TIMEZONE:America/Los_Angeles",
         "X-PUBLISHED-TTL:PT4H",
     ]
