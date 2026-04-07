@@ -256,32 +256,44 @@ def main():
 
     target_menu = None
 
-    # Check if current menu is already the target month
-    if current_menu["month"] == target_month and current_menu["year"] == target_year:
-        print(f"  Current menu is already {target_label}.")
-        target_menu = current_menu
-    else:
-        next_info = current_menu.get("nextMonthPublished")
-        if next_info:
-            candidate = fetch_menu(next_info["id"])
-            if candidate["month"] == target_month and candidate["year"] == target_year:
-                print(f"  Found via API nextMonthPublished!")
-                target_menu = candidate
-            else:
-                print(f"  nextMonthPublished exists but is {candidate['month']}/{candidate['year']}, not target.")
+    # Traverse the nextMonthPublished chain until we reach the target month
+    menu = current_menu
+    target_menu = None
+    visited = set()
 
-        # If API month field is wrong but items exist, trust today's date
-        # The school sometimes updates menu content without updating the month field
-        if not target_menu and not next_info:
-            print(f"  API month field says {current_menu['month']}/{current_menu['year']} but no next month exists.")
-            print(f"  Checking if current menu items match target month {target_month}/{target_year}...")
-            item_days = set(item.get("day") for item in current_menu["items"] if item.get("day"))
+    for _ in range(6):  # max 6 hops forward
+        m_id = menu["id"]
+        if m_id in visited:
+            print("  Traversal loop detected, stopping.")
+            break
+        visited.add(m_id)
+
+        m_month = menu["month"]
+        m_year = menu["year"]
+        print(f"  Checking menu {m_id}: {m_month}/{m_year}")
+
+        if m_month == target_month and m_year == target_year:
+            print(f"  Found target month via API chain!")
+            target_menu = menu
+            # Save this ID so next run starts from here
+            save_menu_id(menu["id"])
+            break
+
+        # If API month field is stale but no next month exists, trust today's date
+        next_info = menu.get("nextMonthPublished")
+        if not next_info:
+            print(f"  No nextMonthPublished from {m_month}/{m_year}.")
+            print(f"  Checking if menu items match target month {target_month}/{target_year}...")
+            item_days = set(item.get("day") for item in menu["items"] if item.get("day"))
             if item_days:
                 print(f"  Menu has items for days: {sorted(item_days)[:5]}... — treating as {target_label}")
-                # Override the month/year so ICS is generated for the correct month
-                current_menu["month"] = target_month
-                current_menu["year"] = target_year
-                target_menu = current_menu
+                menu["month"] = target_month
+                menu["year"] = target_year
+                target_menu = menu
+            break
+
+        print(f"  Following nextMonthPublished to {next_info['id']}...")
+        menu = fetch_menu(next_info["id"])
 
     # ── Step 2: Scrape LCUSD website as fallback ───────────
     if not target_menu:
