@@ -177,24 +177,66 @@ def build_daily_menu(menu_data):
     return daily
 
 
-def generate_ics(daily_menu, month, year):
+def parse_existing_events(ics_path):
+    # Parse existing ICS and return dict of {date_str: event_block}
+    if not os.path.exists(ics_path):
+        return {}
+    with open(ics_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    events = {}
+    raw_events = re.findall(r"BEGIN:VEVENT.*?END:VEVENT", content, re.DOTALL)
+    for event in raw_events:
+        match = re.search(r"DTSTART[^:]*:(\d{8})", event)
+        if match:
+            date_str = match.group(1)
+            events[date_str] = event.strip()
+    return events
+
+
+def get_window_months(new_month, new_year):
+    """
+    Returns a set of (month, year) tuples for the rolling 4-month window:
+    2 months back, current month, and the new month being added.
+    """
+    window = set()
+    m, y = new_month, new_year
+    for _ in range(4):
+        window.add((m, y))
+        # Step backwards
+        if m == 1:
+            m, y = 12, y - 1
+        else:
+            m -= 1
+    return window
+
+
+def generate_ics(daily_menu, month, year, existing_ics_path=None):
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    lines = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//LCUSD Elementary Lunch//EN",
-        "CALSCALE:GREGORIAN",
-        "METHOD:PUBLISH",
-        "X-WR-CALNAME:LCE AI Lunch Calendar",
-        "X-WR-TIMEZONE:America/Los_Angeles",
-        "X-PUBLISHED-TTL:PT4H",
-    ]
+
+    # Determine the 4-month rolling window to keep
+    window = get_window_months(month, year)
+
+    # Load existing events and filter to only keep events within the window
+    existing_events = {}
+    if existing_ics_path:
+        all_existing = parse_existing_events(existing_ics_path)
+        for date_str, event_block in all_existing.items():
+            try:
+                event_date = date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
+                if (event_date.month, event_date.year) in window:
+                    existing_events[date_str] = event_block
+            except ValueError:
+                continue
+        print(f"  Retaining {len(existing_events)} events within the 4-month window.")
+
+    # Build new events for this month
+    new_events = {}
     for day_date in sorted(daily_menu.keys()):
         items = daily_menu[day_date]
         title = " | ".join(items) if items else "Lunch Menu"
         date_str = day_date.strftime("%Y%m%d")
         uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"lcusd-lunch-{date_str}"))
-        lines += [
+        event_block = "\r\n".join([
             "BEGIN:VEVENT",
             f"UID:{uid}",
             f"DTSTAMP:{now}",
@@ -204,10 +246,25 @@ def generate_ics(daily_menu, month, year):
             "DESCRIPTION:LCUSD Elementary School Lunch Menu",
             "TRANSP:TRANSPARENT",
             "END:VEVENT",
-        ]
-    lines.append("END:VCALENDAR")
-    return "\r\n".join(lines)
+        ])
+        new_events[date_str] = event_block
 
+    # Merge: new month overrides any existing events for same dates
+    all_events = {**existing_events, **new_events}
+
+    header = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//LCUSD Elementary Lunch//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:LCE AI Lunch Calendar",
+        "X-WR-TIMEZONE:America/Los_Angeles",
+        "X-PUBLISHED-TTL:PT4H",
+    ]
+    event_lines = [all_events[d] for d in sorted(all_events.keys())]
+    footer = ["END:VCALENDAR"]
+    return "\r\n".join(header + event_lines + footer)
 
 def file_hash(filepath):
     if not os.path.exists(filepath):
@@ -334,7 +391,7 @@ def main():
     daily_menu = build_daily_menu(target_menu)
     print(f"Menu items found for {len(daily_menu)} school days")
 
-    ics_content = generate_ics(daily_menu, month, year)
+    ics_content = generate_ics(daily_menu, month, year, existing_ics_path=OUTPUT_ICS)
 
     os.makedirs("docs", exist_ok=True)
     old_hash = file_hash(OUTPUT_ICS)
