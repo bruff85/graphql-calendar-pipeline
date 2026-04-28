@@ -15,6 +15,7 @@ import re
 import requests
 from datetime import datetime, date, timedelta
 import os
+from notify import notify_success, notify_failure
 
 # ─────────────────────────────────────────────
 # CONFIGURATION
@@ -381,6 +382,7 @@ def main():
     if not target_menu:
         print(f"\n{target_label} menu not available yet — keeping existing ICS unchanged.")
         print("Will retry at next scheduled run (10am or 6pm today, or tomorrow).")
+        notify_failure("LCE AI Lunch Calendar", target_label, "Menu not published in API or website yet.")
         return
 
     # ── Generate and save ICS ──────────────────────────────
@@ -407,6 +409,7 @@ def main():
     # Mark this month as successfully found so we stop retrying
     save_next_month_found(month, year)
     print(f"Marked {month}/{year} as found — retries will stop until next cycle.")
+    notify_success("LCE AI Lunch Calendar", datetime(year, month, 1).strftime("%B %Y"), len(daily_menu))
     print("\nDone! ✅")
 
 
