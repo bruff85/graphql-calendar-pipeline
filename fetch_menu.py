@@ -2,14 +2,11 @@
 """
 LCUSD Elementary School Lunch Calendar Generator
 
-Schedule: Runs on the last day of each month AND as a retry on the
-1st, 3rd, 5th, and 7th of each month to catch late API publishing.
-
-Logic:
-  1. Try nextMonthPublished from the API chain (fastest)
-  2. If null, scrape the LCUSD nutrition site for next month's menu ID
-  3. If not published yet, keep current month's ICS and exit cleanly
-  4. Only commit if menu data actually changed
+Schedule:
+- Starts running on the 27th of each month at 8pm PT
+- Then runs daily at 10am and 6pm PT until next month's menu is found
+- Once found, stops updating until the 27th of the following month
+- Manual triggers always run regardless of date
 """
 
 import hashlib
@@ -26,6 +23,7 @@ GRAPHQL_URL = "https://api.schoolnutritionandfitness.com/graphql"
 LCUSD_MENU_URL = "https://nutrition.lcusd.net/index.php?sid=2506080150154913&page=menus&sm={month}&sy={year}"
 SEED_MENU_ID = "698b7e94cc6f3104111f19e7"
 MENU_ID_FILE = "current_menu_id.txt"
+NEXT_MONTH_FOUND_FILE = "next_month_found.txt"
 OUTPUT_ICS = "docs/lunch.ics"
 EXCLUDE_CATEGORIES = {"Milk", "Condiment", "Extra"}
 
@@ -67,6 +65,26 @@ def save_menu_id(menu_id):
         f.write(menu_id)
 
 
+def get_next_month_found():
+    """Returns the month/year string we already found, e.g. '5/2026', or None."""
+    if os.path.exists(NEXT_MONTH_FOUND_FILE):
+        with open(NEXT_MONTH_FOUND_FILE, "r") as f:
+            val = f.read().strip()
+            if val:
+                return val
+    return None
+
+
+def save_next_month_found(month, year):
+    with open(NEXT_MONTH_FOUND_FILE, "w") as f:
+        f.write(f"{month}/{year}")
+
+
+def clear_next_month_found():
+    if os.path.exists(NEXT_MONTH_FOUND_FILE):
+        os.remove(NEXT_MONTH_FOUND_FILE)
+
+
 def fetch_menu(menu_id):
     response = requests.post(
         GRAPHQL_URL,
@@ -82,65 +100,47 @@ def fetch_menu(menu_id):
 
 
 def scrape_menu_id_from_website(month, year):
-    """
-    Scrape the LCUSD nutrition site to find the menu ID for a given month/year.
-    Looks for the 'Lunch Menu' link which contains the menu ID in its href.
-    Returns the menu ID string if found, or None if not published yet.
-    """
     url = LCUSD_MENU_URL.format(month=month, year=year)
     print(f"  Scraping LCUSD site for {month}/{year}: {url}")
-
     try:
         response = requests.get(url, timeout=30, headers={
             "User-Agent": "Mozilla/5.0 (compatible; LunchCalendarBot/1.0)"
         })
         response.raise_for_status()
         html = response.text
-
-        # Check if the page says no menus published
         if "No menus published for this month" in html:
             print(f"  Site confirms: no menus published for {month}/{year} yet.")
             return None
-
-        # Look for the Lunch Menu link containing the menu ID
-        # Pattern: href contains webmenus2 URL with id= parameter
-        # e.g. href="https://www.schoolnutritionandfitness.com/webmenus2/#/view?id=698b7e94cc6f3104111f19e7&siteCode=24701"
         patterns = [
-            r'webmenus2[^"]*id=([a-f0-9]{24})[^"]*siteCode=24701[^"]*"[^>]*>(?:[^<]*<[^>]+>)*[^<]*Lunch Menu',
+            r'webmenus2[^"]*id=([a-f0-9]{24})[^"]*siteCode=24701',
             r'id=([a-f0-9]{24})[^"]*siteCode=24701',
             r'open\?id=([a-f0-9]{24})',
         ]
-
         for pattern in patterns:
             matches = re.findall(pattern, html, re.IGNORECASE)
             if matches:
                 menu_id = matches[0]
                 print(f"  Found menu ID from website: {menu_id}")
                 return menu_id
-
         print(f"  Could not extract menu ID from page HTML.")
         return None
-
     except requests.RequestException as e:
         print(f"  Website scrape failed: {e}")
         return None
 
 
 def get_next_month(month, year):
-    """Return (month, year) for the month after the given one."""
     if month == 12:
         return 1, year + 1
     return month + 1, year
 
 
-def is_last_day_of_month(today):
-    tomorrow = today + timedelta(days=1)
-    return tomorrow.month != today.month
-
-
-def is_early_month_retry(today):
-    """Returns True if today is one of our retry days (1st, 3rd, 5th, 7th)."""
-    return today.day in {1, 3, 5, 7}
+def should_run_today(today):
+    """
+    Run on the 27th or later (initial search for next month),
+    or on the 1st through 15th (daily retries if not found yet).
+    """
+    return today.day >= 27 or today.day <= 15
 
 
 def build_daily_menu(menu_data):
@@ -179,7 +179,6 @@ def build_daily_menu(menu_data):
 
 def generate_ics(daily_menu, month, year):
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    month_label = datetime(year, month, 1).strftime("%B %Y")
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -225,43 +224,47 @@ def main():
     today = date.today()
     print(f"Today: {today}")
 
-    # FORCE_RUN=true is set by the workflow when triggered manually
     force_run = os.environ.get("FORCE_RUN", "false").lower() == "true"
-    last_day = is_last_day_of_month(today)
-    early_retry = is_early_month_retry(today)
 
-    if not last_day and not early_retry and not force_run:
+    if not force_run and not should_run_today(today):
         print(f"Today (day {today.day}) is not a scheduled run day. Skipping.")
-        print("Tip: Use 'Run workflow' in GitHub Actions to force a run anytime.")
         return
 
     if force_run:
         print("Manual trigger detected — forcing run regardless of date.")
 
-    if last_day:
-        print("Running end-of-month update — looking for next month's menu...")
+    # Determine target month
+    # On the 27th or later we're looking for NEXT month
+    # On the 1st-15th we're still looking for the current month
+    if today.day >= 27:
         target_month, target_year = get_next_month(today.month, today.year)
     else:
-        print(f"Targeting current month: {today.month}/{today.year}")
         target_month, target_year = today.month, today.year
 
     target_label = datetime(target_year, target_month, 1).strftime("%B %Y")
     print(f"Target month: {target_label}")
 
-    # ── Step 1: Try the API chain ──────────────────────────
+    # Check if we already found and loaded this month successfully
+    already_found = get_next_month_found()
+    if already_found == f"{target_month}/{target_year}" and not force_run:
+        print(f"Already successfully loaded {target_label} — nothing to do.")
+        print("Will reset on the 27th to start looking for the following month.")
+        return
+
+    # Reset the found flag when we roll into a new search cycle (27th)
+    if today.day == 27:
+        print("Starting new monthly search cycle — resetting found flag.")
+        clear_next_month_found()
+
+    # ── Step 1: Traverse API chain ─────────────────────────
     current_id = get_current_menu_id()
     print(f"\nStep 1: Checking API chain from menu ID: {current_id}")
     current_menu = fetch_menu(current_id)
-    print(f"  Current menu in file: {current_menu['month']}/{current_menu['year']}")
-
-    target_menu = None
-
-    # Traverse the nextMonthPublished chain until we reach the target month
-    menu = current_menu
     target_menu = None
     visited = set()
+    menu = current_menu
 
-    for _ in range(6):  # max 6 hops forward
+    for _ in range(6):
         m_id = menu["id"]
         if m_id in visited:
             print("  Traversal loop detected, stopping.")
@@ -275,15 +278,13 @@ def main():
         if m_month == target_month and m_year == target_year:
             print(f"  Found target month via API chain!")
             target_menu = menu
-            # Save this ID so next run starts from here
             save_menu_id(menu["id"])
             break
 
-        # If API month field is stale but no next month exists, trust today's date
         next_info = menu.get("nextMonthPublished")
         if not next_info:
             print(f"  No nextMonthPublished from {m_month}/{m_year}.")
-            print(f"  Checking if menu items match target month {target_month}/{target_year}...")
+            # Check if API month field is stale but items match target
             item_days = set(item.get("day") for item in menu["items"] if item.get("day"))
             if item_days:
                 print(f"  Menu has items for days: {sorted(item_days)[:5]}... — treating as {target_label}")
@@ -305,23 +306,30 @@ def main():
                 if candidate["month"] == target_month and candidate["year"] == target_year:
                     print(f"  Found via website scrape!")
                     target_menu = candidate
+                    save_menu_id(scraped_id)
                 else:
                     print(f"  Scraped ID returned wrong month: {candidate['month']}/{candidate['year']}")
+                    # Trust today's date if items exist
+                    item_days = set(item.get("day") for item in candidate["items"] if item.get("day"))
+                    if item_days:
+                        print(f"  Items exist — treating as {target_label}")
+                        candidate["month"] = target_month
+                        candidate["year"] = target_year
+                        target_menu = candidate
+                        save_menu_id(scraped_id)
             except Exception as e:
                 print(f"  Failed to fetch scraped menu ID: {e}")
 
     # ── Step 3: Give up gracefully ─────────────────────────
     if not target_menu:
         print(f"\n{target_label} menu not available yet — keeping existing ICS unchanged.")
-        print("Will retry on the next scheduled run day.")
+        print("Will retry at next scheduled run (10am or 6pm today, or tomorrow).")
         return
 
     # ── Generate and save ICS ──────────────────────────────
     month = target_menu["month"]
     year = target_menu["year"]
     print(f"\nGenerating ICS for: {datetime(year, month, 1).strftime('%B %Y')}")
-
-    save_menu_id(target_menu["id"])
 
     daily_menu = build_daily_menu(target_menu)
     print(f"Menu items found for {len(daily_menu)} school days")
@@ -339,6 +347,9 @@ def main():
             f.write(ics_content)
         print(f"ICS file updated with {len(daily_menu)} events.")
 
+    # Mark this month as successfully found so we stop retrying
+    save_next_month_found(month, year)
+    print(f"Marked {month}/{year} as found — retries will stop until next cycle.")
     print("\nDone! ✅")
 
 
