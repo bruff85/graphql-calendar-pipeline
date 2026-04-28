@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
 Gmail notification module for lunch calendar scripts.
-Sends success/failure emails via Gmail API using OAuth credentials.
+Sends success/failure/not-found emails via Gmail API using OAuth credentials.
+
+Notification logic:
+- Found & Success: sent immediately when next month is loaded
+- Found & Failure: sent immediately when month is found but processing fails
+- Not Found: sent only on the 6pm PT run (02:00 UTC) if month still not published
 """
 
 import os
 import base64
-import json
 from email.mime.text import MIMEText
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -69,8 +73,19 @@ def send_email(subject, body):
         print(f"  Failed to send email notification: {e}")
 
 
+def is_evening_run():
+    """
+    Returns True if this is the 6pm PT run (02:00 UTC).
+    The 10am PT run is at 18:00 UTC — we only send 'not found' on the evening run.
+    """
+    now_utc = datetime.now(timezone.utc)
+    # Evening run is at 02:xx UTC (6pm PT)
+    # Morning run is at 18:xx UTC (10am PT)
+    return now_utc.hour == 2
+
+
 def notify_success(calendar_name, month_label, event_count):
-    """Send a success notification email."""
+    """Send a success notification email — sent immediately."""
     subject = f"✅ {calendar_name} — {month_label} Menu Loaded"
     body = f"""Hello,
 
@@ -81,7 +96,7 @@ Events generated: {event_count} school days
 
 Your calendar subscription will refresh automatically within a few hours.
 
-Subscribe link:
+Subscription links:
 - LCUSD: https://bruff85.github.io/lcusd-lunch-calendar/lunch.ics
 - Arroyo: https://bruff85.github.io/arroyo-lunch-calendar/lunch.ics
 
@@ -91,18 +106,45 @@ Subscribe link:
     send_email(subject, body)
 
 
-def notify_failure(calendar_name, target_month_label, reason):
-    """Send a failure notification email."""
-    subject = f"⚠️ {calendar_name} — {target_month_label} Menu Not Found"
+def notify_found_failure(calendar_name, month_label, reason):
+    """Send a failure notification when month was found but processing failed — sent immediately."""
+    subject = f"❌ {calendar_name} — {month_label} Found But Failed"
     body = f"""Hello,
 
-The {calendar_name} was unable to load the {target_month_label} menu.
+The {calendar_name} found the {month_label} menu but encountered an error while processing it.
 
-Reason: {reason}
+Error: {reason}
 
-The script will automatically retry at the next scheduled run.
-If this continues, you may need to manually check the school website
-and trigger the workflow manually from GitHub Actions.
+Please check the GitHub Actions log for details and consider triggering a manual run.
+
+GitHub Actions:
+- LCUSD: https://github.com/bruff85/lcusd-lunch-calendar/actions
+- Arroyo: https://github.com/bruff85/arroyo-lunch-calendar/actions
+
+— Lunch Calendar Bot
+{datetime.now().strftime("%B %d, %Y at %I:%M %p")}
+"""
+    send_email(subject, body)
+
+
+def notify_not_found(calendar_name, month_label):
+    """
+    Send a 'not found' notification — only sent on the evening run (6pm PT).
+    This prevents duplicate emails when both the 10am and 6pm runs fail.
+    """
+    if not is_evening_run():
+        print(f"  Morning run — skipping 'not found' email (will send tonight if still missing).")
+        return
+
+    subject = f"⏳ {calendar_name} — {month_label} Not Published Yet"
+    body = f"""Hello,
+
+The {calendar_name} checked for the {month_label} menu today but it has not been published yet.
+
+The script will automatically retry tomorrow at 10am and 6pm PT.
+You will receive this email once per day until the menu is found.
+
+Once found you will receive a separate confirmation email.
 
 GitHub Actions:
 - LCUSD: https://github.com/bruff85/lcusd-lunch-calendar/actions
