@@ -15,7 +15,7 @@ import re
 import requests
 from datetime import datetime, date, timedelta
 import os
-from notify import notify_success, notify_failure
+from notify import notify_success, notify_found_failure, notify_not_found
 
 # ─────────────────────────────────────────────
 # CONFIGURATION
@@ -382,7 +382,7 @@ def main():
     if not target_menu:
         print(f"\n{target_label} menu not available yet — keeping existing ICS unchanged.")
         print("Will retry at next scheduled run (10am or 6pm today, or tomorrow).")
-        notify_failure("LCE AI Lunch Calendar", target_label, "Menu not published in API or website yet.")
+        notify_not_found("LCE AI Lunch Calendar", target_label)
         return
 
     # ── Generate and save ICS ──────────────────────────────
