@@ -244,17 +244,17 @@ def main():
     target_label = datetime(target_year, target_month, 1).strftime("%B %Y")
     print(f"Target month: {target_label}")
 
+    # Reset the found flag FIRST when we roll into a new search cycle (27th)
+    if today.day == 27:
+        print("Starting new monthly search cycle — resetting found flag.")
+        clear_next_month_found()
+
     # Check if we already found and loaded this month successfully
     already_found = get_next_month_found()
     if already_found == f"{target_month}/{target_year}" and not force_run:
         print(f"Already successfully loaded {target_label} — nothing to do.")
-        print("Will reset on the 27th to start looking for the following month.")
+        print("Will retry on the 27th for the following month.")
         return
-
-    # Reset the found flag when we roll into a new search cycle (27th)
-    if today.day == 27:
-        print("Starting new monthly search cycle — resetting found flag.")
-        clear_next_month_found()
 
     # ── Step 1: Traverse API chain ─────────────────────────
     current_id = get_current_menu_id()
