@@ -2,15 +2,13 @@ name: Generate Monthly Lunch Calendar
 
 on:
   schedule:
-    - cron: '0 16 28 * *'   # Covers February last day (8am PT)
-    - cron: '0 16 30 * *'   # Covers 30-day months
-    - cron: '0 16 31 * *'   # Covers 31-day months
-    - cron: '0 16 1 * *'    # Retry: 1st of month
-    - cron: '0 16 3 * *'    # Retry: 3rd of month
-    - cron: '0 16 5 * *'    # Retry: 5th of month
-    - cron: '0 16 7 * *'    # Retry: 7th of month
+    # Initial run on the 27th at 8pm PT (4:00 UTC next day)
+    - cron: '0 4 28 * *'    # 27th 8pm PT = 28th 4:00 UTC
+    # Daily retries at 10am PT (18:00 UTC) and 6pm PT (02:00 UTC next day)
+    - cron: '0 18 * * *'    # 10am PT daily
+    - cron: '0 2 * * *'     # 6pm PT daily
 
-  workflow_dispatch:  # Manual trigger — always runs regardless of date
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -33,7 +31,6 @@ jobs:
 
       - name: Run menu fetcher
         env:
-          # Set FORCE_RUN=true when triggered manually so the date check is bypassed
           FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: python fetch_menu.py
 
@@ -41,6 +38,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/lunch.ics current_menu_id.txt
+          git add docs/lunch.ics current_menu_id.txt next_month_found.txt
           git diff --staged --quiet || git commit -m "Update lunch calendar for $(date +'%B %Y')"
           git push
