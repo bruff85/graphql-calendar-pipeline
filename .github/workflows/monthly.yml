@@ -2,11 +2,11 @@ name: Generate Monthly Lunch Calendar
 
 on:
   schedule:
-    # Initial run on the 27th at 8pm PT (4:00 UTC next day)
-    - cron: '0 4 28 * *'    # 27th 8pm PT = 28th 4:00 UTC
-    # Daily retries at 10am PT (18:00 UTC) and 6pm PT (02:00 UTC next day)
-    - cron: '0 18 * * *'    # 10am PT daily
-    - cron: '0 2 * * *'     # 6pm PT daily
+    # Initial run on the 27th at 8:15pm PT (28th 4:15 UTC)
+    - cron: '15 4 28 * *'   # 27th 8:15pm PT = 28th 4:15 UTC
+    # Daily retries at 10am PT (18:15 UTC) and 6pm PT (02:15 UTC next day)
+    - cron: '15 18 * * *'   # 10am PT daily
+    - cron: '15 2 * * *'    # 6pm PT daily
 
   workflow_dispatch:
 
@@ -32,6 +32,10 @@ jobs:
       - name: Run menu fetcher
         env:
           FORCE_RUN: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: python fetch_menu.py
 
       - name: Commit and push updated files
