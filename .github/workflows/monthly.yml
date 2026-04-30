@@ -4,7 +4,8 @@ on:
   schedule:
     # Initial run on the 27th at 8:15pm PT (28th 4:15 UTC)
     - cron: '15 4 28 * *'   # 27th 8:15pm PT = 28th 4:15 UTC
-    # Daily retries at 10am PT (18:15 UTC) and 6pm PT (02:15 UTC next day)
+    # Daily retries at 7am PT (14:15 UTC), 10am PT (18:15 UTC) and 6pm PT (02:15 UTC next day)
+    - cron: '15 14 * * *'   # 7am PT daily
     - cron: '15 18 * * *'   # 10am PT daily
     - cron: '15 2 * * *'    # 6pm PT daily
 
