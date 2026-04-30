@@ -7,7 +7,7 @@ Notification logic:
 - Found & Success: sent immediately when next month is loaded
 - Found & Failure: sent immediately when month is found but processing fails
 - Not Found: sent only on the 6pm PT run (02:00 UTC) if month still not published
-"""
+"""      
 
 import os
 import base64
@@ -76,11 +76,12 @@ def send_email(subject, body):
 def is_evening_run():
     """
     Returns True if this is the 6pm PT run (02:00 UTC).
-    The 10am PT run is at 18:00 UTC — we only send 'not found' on the evening run.
+    The 7am PT run is at 14:00 UTC and 10am PT run is at 18:00 UTC.
+    We only send 'not found' on the evening run.
     """
     now_utc = datetime.now(timezone.utc)
     # Evening run is at 02:xx UTC (6pm PT)
-    # Morning run is at 18:xx UTC (10am PT)
+    # Morning runs are at 14:xx UTC (7am PT) and 18:xx UTC (10am PT)
     return now_utc.hour == 2
 
 
