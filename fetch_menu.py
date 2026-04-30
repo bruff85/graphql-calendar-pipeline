@@ -15,6 +15,7 @@ import re
 import requests
 from datetime import datetime, date, timedelta
 import os
+from notify import notify_success, notify_found_failure, notify_not_found
 
 # ─────────────────────────────────────────────
 # CONFIGURATION
@@ -195,14 +196,13 @@ def parse_existing_events(ics_path):
 
 def get_window_months(new_month, new_year):
     """
-    Returns a set of (month, year) tuples for the rolling 4-month window:
-    2 months back, current month, and the new month being added.
+    Returns a set of (month, year) tuples for the rolling 2-month window:
+    current month and the new month being added.
     """
     window = set()
     m, y = new_month, new_year
-    for _ in range(4):
+    for _ in range(2):
         window.add((m, y))
-        # Step backwards
         if m == 1:
             m, y = 12, y - 1
         else:
@@ -227,7 +227,7 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None):
                     existing_events[date_str] = event_block
             except ValueError:
                 continue
-        print(f"  Retaining {len(existing_events)} events within the 4-month window.")
+        print(f"  Retaining {len(existing_events)} events within the 2-month window.")
 
     # Build new events for this month
     new_events = {}
@@ -381,6 +381,7 @@ def main():
     if not target_menu:
         print(f"\n{target_label} menu not available yet — keeping existing ICS unchanged.")
         print("Will retry at next scheduled run (10am or 6pm today, or tomorrow).")
+        notify_not_found("LCE AI Lunch Calendar", target_label)
         return
 
     # ── Generate and save ICS ──────────────────────────────
@@ -403,6 +404,7 @@ def main():
         with open(OUTPUT_ICS, "w", encoding="utf-8") as f:
             f.write(ics_content)
         print(f"ICS file updated with {len(daily_menu)} events.")
+        notify_success("LCE AI Lunch Calendar", datetime(year, month, 1).strftime("%B %Y"), len(daily_menu))
 
     # Mark this month as successfully found so we stop retrying
     save_next_month_found(month, year)
