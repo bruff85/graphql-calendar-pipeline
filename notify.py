@@ -7,7 +7,7 @@ Notification logic:
 - Found & Success: sent immediately when next month is loaded
 - Found & Failure: sent immediately when month is found but processing fails
 - Not Found: sent only on the 6pm PT run (02:00 UTC) if month still not published
-"""      
+"""
 
 import os
 import base64
@@ -98,8 +98,8 @@ Events generated: {event_count} school days
 Your calendar subscription will refresh automatically within a few hours.
 
 Subscription links:
-- LCUSD: https://bruff85.github.io/lcusd-lunch-calendar/lunch.ics
-- Arroyo: https://bruff85.github.io/arroyo-lunch-calendar/lunch.ics
+- LCUSD: https://bruff85.github.io/graphql-snf-pipeline/lunch.ics
+- Arroyo: https://bruff85.github.io/healthepro-pipeline/lunch.ics
 
 — Lunch Calendar Bot
 {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
@@ -119,8 +119,8 @@ Error: {reason}
 Please check the GitHub Actions log for details and consider triggering a manual run.
 
 GitHub Actions:
-- LCUSD: https://github.com/bruff85/lcusd-lunch-calendar/actions
-- Arroyo: https://github.com/bruff85/arroyo-lunch-calendar/actions
+- LCUSD: https://github.com/bruff85/graphql-snf-pipeline/actions
+- Arroyo: https://github.com/bruff85/healthepro-pipeline/actions
 
 — Lunch Calendar Bot
 {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
@@ -148,8 +148,8 @@ You will receive this email once per day until the menu is found.
 Once found you will receive a separate confirmation email.
 
 GitHub Actions:
-- LCUSD: https://github.com/bruff85/lcusd-lunch-calendar/actions
-- Arroyo: https://github.com/bruff85/arroyo-lunch-calendar/actions
+- LCUSD: https://github.com/bruff85/graphql-snf-pipeline/actions
+- Arroyo: https://github.com/bruff85/healthepro-pipeline/actions
 
 — Lunch Calendar Bot
 {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
