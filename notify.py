@@ -87,7 +87,7 @@ def is_evening_run():
 
 def notify_success(calendar_name, month_label, event_count):
     """Send a success notification email — sent immediately."""
-    subject = f"✅ {calendar_name} — {month_label} Menu Loaded"
+    subject = f"✅ graphql-calendar-pipeline — {month_label} Menu Loaded"
     body = f"""Hello,
 
 The {calendar_name} has been successfully updated!
@@ -97,9 +97,8 @@ Events generated: {event_count} school days
 
 Your calendar subscription will refresh automatically within a few hours.
 
-Subscription links:
-- LCUSD: https://bruff85.github.io/graphql-calendar-pipeline/lunch.ics
-- Arroyo: https://bruff85.github.io/healthepro-pipeline/lunch.ics
+Subscription link:
+webcal://lunchlook-backend-dev.onrender.com/api/tokens/[YOUR_TOKEN].ics
 
 — Lunch Calendar Bot
 {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
@@ -109,7 +108,7 @@ Subscription links:
 
 def notify_found_failure(calendar_name, month_label, reason):
     """Send a failure notification when month was found but processing failed — sent immediately."""
-    subject = f"❌ {calendar_name} — {month_label} Found But Failed"
+    subject = f"❌ graphql-calendar-pipeline — {month_label} Found But Failed"
     body = f"""Hello,
 
 The {calendar_name} found the {month_label} menu but encountered an error while processing it.
@@ -119,8 +118,7 @@ Error: {reason}
 Please check the GitHub Actions log for details and consider triggering a manual run.
 
 GitHub Actions:
-- LCUSD: https://github.com/bruff85/graphql-calendar-pipeline/actions
-- Arroyo: https://github.com/bruff85/healthepro-pipeline/actions
+https://github.com/bruff85/graphql-calendar-pipeline/actions
 
 — Lunch Calendar Bot
 {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
@@ -137,7 +135,7 @@ def notify_not_found(calendar_name, month_label):
         print(f"  Morning run — skipping 'not found' email (will send tonight if still missing).")
         return
 
-    subject = f"⏳ {calendar_name} — {month_label} Not Published Yet"
+    subject = f"⏳ graphql-calendar-pipeline — {month_label} Not Published Yet"
     body = f"""Hello,
 
 The {calendar_name} checked for the {month_label} menu today but it has not been published yet.
@@ -148,8 +146,7 @@ You will receive this email once per day until the menu is found.
 Once found you will receive a separate confirmation email.
 
 GitHub Actions:
-- LCUSD: https://github.com/bruff85/graphql-calendar-pipeline/actions
-- Arroyo: https://github.com/bruff85/healthepro-pipeline/actions
+https://github.com/bruff85/graphql-calendar-pipeline/actions
 
 — Lunch Calendar Bot
 {datetime.now().strftime("%B %d, %Y at %I:%M %p")}
