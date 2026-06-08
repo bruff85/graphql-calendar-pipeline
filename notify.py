@@ -98,7 +98,7 @@ Events generated: {event_count} school days
 Your calendar subscription will refresh automatically within a few hours.
 
 Subscription links:
-- LCUSD: https://bruff85.github.io/graphql-snf-pipeline/lunch.ics
+- LCUSD: https://bruff85.github.io/graphql-calendar-pipeline/lunch.ics
 - Arroyo: https://bruff85.github.io/healthepro-pipeline/lunch.ics
 
 — Lunch Calendar Bot
@@ -119,7 +119,7 @@ Error: {reason}
 Please check the GitHub Actions log for details and consider triggering a manual run.
 
 GitHub Actions:
-- LCUSD: https://github.com/bruff85/graphql-snf-pipeline/actions
+- LCUSD: https://github.com/bruff85/graphql-calendar-pipeline/actions
 - Arroyo: https://github.com/bruff85/healthepro-pipeline/actions
 
 — Lunch Calendar Bot
@@ -148,7 +148,7 @@ You will receive this email once per day until the menu is found.
 Once found you will receive a separate confirmation email.
 
 GitHub Actions:
-- LCUSD: https://github.com/bruff85/graphql-snf-pipeline/actions
+- LCUSD: https://github.com/bruff85/graphql-calendar-pipeline/actions
 - Arroyo: https://github.com/bruff85/healthepro-pipeline/actions
 
 — Lunch Calendar Bot
