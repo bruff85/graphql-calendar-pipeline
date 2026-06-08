@@ -97,7 +97,7 @@ Events generated: {event_count} school days
 
 Your calendar subscription will refresh automatically within a few hours.
 
-Subscription link:
+Subscription link to verify:
 webcal://lunchlook-backend-dev.onrender.com/api/tokens/admin_lunchlook_workflow_monitoring_token.ics
 
 — Lunch Calendar Bot
