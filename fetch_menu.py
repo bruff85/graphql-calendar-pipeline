@@ -167,7 +167,14 @@ def fetch_menu(menu_id):
     data = response.json()
     if "errors" in data:
         raise ValueError(f"GraphQL errors: {data['errors']}")
-    return data["data"]["menu"]
+    menu = data["data"]["menu"]
+    # The SNF API reports months 0-INDEXED: May comes back as 4. Python's date
+    # and datetime are 1-indexed. Normalise once, here at the boundary, so every
+    # comparison and every date() call downstream speaks one convention --
+    # converting at each use site is exactly how this off-by-one survived.
+    if menu and menu.get("month") is not None:
+        menu["month"] = int(menu["month"]) + 1
+    return menu
 
 
 # Which menu we want, and how to recognise it on the page.
@@ -614,14 +621,13 @@ def main():
 
         next_info = menu.get("nextMonthPublished")
         if not next_info:
-            print(f"  No nextMonthPublished from {m_month}/{m_year}.")
-            # Check if API month field is stale but items match target
-            item_days = set(item.get("day") for item in menu["items"] if item.get("day"))
-            if item_days:
-                print(f"  Menu has items for days: {sorted(item_days)[:5]}... — treating as {target_label}")
-                menu["month"] = target_month
-                menu["year"] = target_year
-                target_menu = menu
+            # Do NOT relabel here. This menu carries a month, that month is not
+            # the one we want, and having items proves nothing -- every menu has
+            # items. Claiming it as the target published June's food on August
+            # dates AND marked August "found", so the real August menu would
+            # never have been fetched. Fall through to the website scrape, and
+            # then to placeholders, which is the honest answer: not out yet.
+            print(f"  Chain ends at {m_month}/{m_year} — {target_label} not published in the API.")
             break
 
         print(f"  Following nextMonthPublished to {next_info['id']}...")
