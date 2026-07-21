@@ -579,6 +579,18 @@ def main():
     else:
         target_month, target_year = today.month, today.year
 
+    # Optional override, for checking a specific month without waiting for the
+    # calendar to roll around. Safe by construction: since #4, a menu is only
+    # used when its own month matches the target, so pointing this at an
+    # unpublished month yields placeholders rather than another month's food.
+    # It also never marks a month "found", so the normal schedule is unaffected.
+    override_month = os.environ.get("TARGET_MONTH", "").strip()
+    if override_month:
+        target_month = int(override_month)
+        target_year = int(os.environ.get("TARGET_YEAR", "").strip() or today.year)
+        print(f"TARGET_MONTH override in effect — looking for {target_month}/{target_year} "
+              f"instead of the scheduled month.")
+
     target_label = datetime(target_year, target_month, 1).strftime("%B %Y")
     print(f"Target month: {target_label}")
 
