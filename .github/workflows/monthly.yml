@@ -23,6 +23,10 @@ on:
         description: 'Optional: year for target_month. Defaults to the current year.'
         type: string
         required: false
+      uat_placeholders:
+        description: 'TEST ONLY: place holders on every weekday from today onward, ignoring the school calendar. For pre-launch UAT during a month when school is out.'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -49,6 +53,7 @@ jobs:
           DEV_ONLY: ${{ inputs.dev_only && 'true' || 'false' }}
           TARGET_MONTH: ${{ inputs.target_month }}
           TARGET_YEAR: ${{ inputs.target_year }}
+          UAT_PLACEHOLDERS: ${{ inputs.uat_placeholders && 'true' || 'false' }}
           GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
           GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
           GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
