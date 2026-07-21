@@ -377,9 +377,22 @@ def is_school_day(day_date):
 
 
 def school_days_in_month(month, year):
+    """School days in a month, per the verified district calendar.
+
+    UAT_PLACEHOLDERS=true relaxes this to every weekday from today onward, so
+    pre-launch testing can put events on a calendar during a month when school
+    is out. TEST ONLY -- it deliberately ignores the school calendar, so never
+    leave it set on a scheduled run or you will publish lunch entries on days
+    with no lunch service.
+    """
+    uat = os.environ.get("UAT_PLACEHOLDERS", "false").lower() == "true"
+    today = date.today()
     days, day_date = [], date(year, month, 1)
     while day_date.month == month:
-        if is_school_day(day_date):
+        if uat:
+            if day_date.weekday() < 5 and day_date >= today:
+                days.append(day_date)
+        elif is_school_day(day_date):
             days.append(day_date)
         day_date += timedelta(days=1)
     return days
@@ -508,7 +521,21 @@ def write_placeholders(month, year, path, prefix="", calname=CALNAME):
         return False
 
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    existing = parse_existing_events(path)
+
+    # Prune to the same 2-month rolling window generate_ics applies. Without
+    # this, a run of months that never get a published menu piles up forever:
+    # placeholders were merged in and nothing ever aged them out, because only
+    # the real-menu path pruned.
+    window = get_window_months(month, year)
+    existing = {}
+    for date_str, event in parse_existing_events(path).items():
+        try:
+            d = date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
+        except ValueError:
+            continue
+        if (d.month, d.year) in window:
+            existing[date_str] = event
+
     placeholders = build_placeholder_events(month, year, now, prefix)
 
     # Skip any date that already has an event — real food, or a placeholder we
