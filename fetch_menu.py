@@ -25,8 +25,78 @@ LCUSD_MENU_URL = "https://nutrition.lcusd.net/index.php?sid=2506080150154913&pag
 SEED_MENU_ID = "698b7e94cc6f3104111f19e7"
 MENU_ID_FILE = "current_menu_id.txt"
 NEXT_MONTH_FOUND_FILE = "next_month_found.txt"
-OUTPUT_ICS = "docs/lunch.ics"
 EXCLUDE_CATEGORIES = {"Milk", "Condiment", "Extra"}
+
+# ─────────────────────────────────────────────
+# FEEDS — prod and dev are separate files
+# ─────────────────────────────────────────────
+# Prod and dev previously shared ONE ics file, so anything written while testing
+# was immediately live to paying parents — there was no staging step to "promote"
+# from, because there was only ever one artifact. That is how 25 hand-authored
+# "TEST:" events ended up being what a prod subscriber's calendar would show.
+#
+# Dev is a MIRROR, not a sandbox: same fetch, same parse, same generation, so a
+# bug in the real path actually reproduces there. The only difference is a
+# "[DEV] " prefix on every summary and on the calendar name, so when you're
+# subscribed to both you can tell at a glance which one you're looking at —
+# including after the real menu publishes, when the two would otherwise be
+# identical exactly when you're mid-troubleshoot.
+CALNAME = "LCE AI Lunch Calendar"
+DEV_PREFIX = "[DEV] "
+
+FEEDS = [
+    {"env": "prod", "path": "docs/lunch.ics",     "prefix": "",         "calname": CALNAME},
+    {"env": "dev",  "path": "docs/lunch-dev.ics", "prefix": DEV_PREFIX, "calname": DEV_PREFIX + CALNAME},
+]
+
+# DEV_ONLY=true writes just the dev feed, leaving prod untouched — the way to
+# watch a fix land in your own calendar before it reaches a parent's. The next
+# scheduled run writes both again and restores the mirror.
+def active_feeds():
+    if os.environ.get("DEV_ONLY", "false").lower() == "true":
+        print("DEV_ONLY=true — writing the dev feed only; prod will not be touched.")
+        return [f for f in FEEDS if f["env"] == "dev"]
+    return FEEDS
+
+# ─────────────────────────────────────────────
+# PLACEHOLDER EVENTS
+# ─────────────────────────────────────────────
+# When a month's menu hasn't been published yet, an empty calendar is
+# indistinguishable from a broken one. A parent who just paid and sees nothing
+# assumes the product is broken and contacts support. These events say "we're
+# working, the district hasn't posted yet" instead of saying nothing.
+#
+# They replace themselves. Event UIDs are derived from the date, so when the
+# real menu arrives the same UID is reissued with real food and calendar apps
+# update the entry in place — no duplicates, nothing for the parent to do.
+#
+# Source: school_calendars row la-canada-unified/2026-27 (status=verified,
+# manually validated 2026-07-18 from the district PDF). UPDATE EACH YEAR.
+SCHOOL_YEAR_LABEL = "2026-27"
+FIRST_DAY = date(2026, 8, 13)
+LAST_DAY = date(2027, 6, 3)
+FALL_SEMESTER_END = date(2026, 12, 18)
+SPRING_SEMESTER_START = date(2027, 1, 5)
+
+# Known no-school weekdays. The verified calendar row only records semester
+# boundaries, so this list is incomplete — holidays inside a month (Thanksgiving,
+# MLK, spring break) are NOT all here yet. That is tolerable because a
+# placeholder is cleared the moment the real menu publishes, and it only ever
+# claims "not posted yet" rather than asserting lunch is served. Fill in from the
+# district calendar when convenient.
+NO_SCHOOL_DATES = {
+    date(2026, 9, 7),    # Labor Day
+    date(2026, 11, 11),  # Veterans Day
+}
+
+PLACEHOLDER_SUMMARY = "Lunch menu not posted yet"
+PLACEHOLDER_DESCRIPTION = (
+    "The district hasn't published this month's lunch menu yet. "
+    "This will fill in automatically once they do - nothing for you to do. - LunchLook"
+)
+# Marks an event as ours to remove later. Without a marker the cleanup pass would
+# have to match on summary text, which breaks the moment the wording changes.
+PLACEHOLDER_MARKER = "X-LUNCHLOOK-PLACEHOLDER"
 
 QUERY = """
 {
@@ -194,6 +264,65 @@ def parse_existing_events(ics_path):
     return events
 
 
+def is_placeholder(event_block):
+    return PLACEHOLDER_MARKER in event_block
+
+
+def is_school_day(day_date):
+    """Weekday, inside a semester, and not a known holiday."""
+    if day_date.weekday() >= 5:
+        return False
+    if not (FIRST_DAY <= day_date <= LAST_DAY):
+        return False
+    # Winter break sits between the two semesters.
+    if FALL_SEMESTER_END < day_date < SPRING_SEMESTER_START:
+        return False
+    return day_date not in NO_SCHOOL_DATES
+
+
+def school_days_in_month(month, year):
+    days, day_date = [], date(year, month, 1)
+    while day_date.month == month:
+        if is_school_day(day_date):
+            days.append(day_date)
+        day_date += timedelta(days=1)
+    return days
+
+
+def build_event(date_str, uid, now, summary, description, placeholder=False):
+    lines = [
+        "BEGIN:VEVENT",
+        f"UID:{uid}",
+        f"DTSTAMP:{now}",
+        f"DTSTART;TZID=America/Los_Angeles:{date_str}T113000",
+        f"DTEND;TZID=America/Los_Angeles:{date_str}T123000",
+        f"SUMMARY:{summary}",
+        f"DESCRIPTION:{description}",
+        "TRANSP:TRANSPARENT",
+    ]
+    if placeholder:
+        lines.append(f"{PLACEHOLDER_MARKER}:1")
+    lines.append("END:VEVENT")
+    return "\r\n".join(lines)
+
+
+def event_uid(date_str):
+    """Deterministic per date — this is what lets a placeholder be replaced by the
+    real menu in place rather than appearing alongside it."""
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, f"lcusd-lunch-{date_str}"))
+
+
+def build_placeholder_events(month, year, now, prefix=""):
+    events = {}
+    for day_date in school_days_in_month(month, year):
+        date_str = day_date.strftime("%Y%m%d")
+        events[date_str] = build_event(
+            date_str, event_uid(date_str), now,
+            prefix + PLACEHOLDER_SUMMARY, PLACEHOLDER_DESCRIPTION, placeholder=True,
+        )
+    return events
+
+
 def get_window_months(new_month, new_year):
     """
     Returns a set of (month, year) tuples for the rolling 2-month window:
@@ -210,7 +339,7 @@ def get_window_months(new_month, new_year):
     return window
 
 
-def generate_ics(daily_menu, month, year, existing_ics_path=None):
+def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", calname=CALNAME):
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
 
     # Determine the 4-month rolling window to keep
@@ -220,34 +349,38 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None):
     existing_events = {}
     if existing_ics_path:
         all_existing = parse_existing_events(existing_ics_path)
+        dropped_placeholders = 0
         for date_str, event_block in all_existing.items():
             try:
                 event_date = date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:8]))
-                if (event_date.month, event_date.year) in window:
-                    existing_events[date_str] = event_block
             except ValueError:
                 continue
+            if (event_date.month, event_date.year) not in window:
+                continue
+            # Drop every placeholder in the month we're publishing. Merging alone
+            # is not enough: a placeholder on a date the real menu does NOT cover
+            # (minimum day, staff day, an unlisted holiday) has nothing to
+            # overwrite it, and would keep telling parents the menu isn't posted
+            # after it was posted. Once we have the real menu, its silence about a
+            # date IS the answer — no lunch that day.
+            if is_placeholder(event_block) and (event_date.month, event_date.year) == (month, year):
+                dropped_placeholders += 1
+                continue
+            existing_events[date_str] = event_block
         print(f"  Retaining {len(existing_events)} events within the 2-month window.")
+        if dropped_placeholders:
+            print(f"  Cleared {dropped_placeholders} placeholder(s) now that the real menu is in.")
 
     # Build new events for this month
     new_events = {}
     for day_date in sorted(daily_menu.keys()):
         items = daily_menu[day_date]
-        title = " | ".join(items) if items else "Lunch Menu"
+        title = prefix + (" | ".join(items) if items else "Lunch Menu")
         date_str = day_date.strftime("%Y%m%d")
-        uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"lcusd-lunch-{date_str}"))
-        event_block = "\r\n".join([
-            "BEGIN:VEVENT",
-            f"UID:{uid}",
-            f"DTSTAMP:{now}",
-            f"DTSTART;TZID=America/Los_Angeles:{date_str}T113000",
-            f"DTEND;TZID=America/Los_Angeles:{date_str}T123000",
-            f"SUMMARY:{title}",
-            "DESCRIPTION:LCUSD Elementary School Lunch Menu",
-            "TRANSP:TRANSPARENT",
-            "END:VEVENT",
-        ])
-        new_events[date_str] = event_block
+        new_events[date_str] = build_event(
+            date_str, event_uid(date_str), now,
+            title, "LCUSD Elementary School Lunch Menu",
+        )
 
     # Merge: new month overrides any existing events for same dates
     all_events = {**existing_events, **new_events}
@@ -258,13 +391,65 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None):
         "PRODID:-//LCUSD Elementary Lunch//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        "X-WR-CALNAME:LCE AI Lunch Calendar",
+        f"X-WR-CALNAME:{calname}",
         "X-WR-TIMEZONE:America/Los_Angeles",
         "X-PUBLISHED-TTL:PT4H",
     ]
     event_lines = [all_events[d] for d in sorted(all_events.keys())]
     footer = ["END:VCALENDAR"]
     return "\r\n".join(header + event_lines + footer)
+
+def write_placeholders(month, year, path, prefix="", calname=CALNAME):
+    """Publish 'menu not posted yet' events for a month with no menu.
+
+    Only ever ADDS to dates that have no event at all — never overwrites real
+    food, and never touches other months. Returns True if the file changed.
+    """
+    school_days = school_days_in_month(month, year)
+    label = datetime(year, month, 1).strftime("%B %Y")
+    if not school_days:
+        print(f"  {label} has no school days — no placeholders needed.")
+        return False
+
+    now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    existing = parse_existing_events(path)
+    placeholders = build_placeholder_events(month, year, now, prefix)
+
+    # Skip any date that already has an event — real food, or a placeholder we
+    # published earlier. Rebuilding an existing placeholder would only change its
+    # DTSTAMP, which rewrites the file and creates a commit on every scheduled
+    # run (twice a day, forever) while changing nothing a parent would see.
+    to_add = {d: ev for d, ev in placeholders.items() if d not in existing}
+    if not to_add:
+        print(f"  {label}: every school day already has an event — nothing to hold.")
+        return False
+
+    merged = {**existing, **to_add}
+    header = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//LCUSD Elementary Lunch//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        f"X-WR-CALNAME:{calname}",
+        "X-WR-TIMEZONE:America/Los_Angeles",
+        "X-PUBLISHED-TTL:PT4H",
+    ]
+    content = "\r\n".join(
+        header + [merged[d] for d in sorted(merged)] + ["END:VCALENDAR"]
+    )
+
+    os.makedirs("docs", exist_ok=True)
+    if file_hash(path) == hashlib.md5(content.encode()).hexdigest():
+        print(f"  {label}: placeholders already published — no change.")
+        return False
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"  Published {len(to_add)} placeholder(s) for {label} "
+          f"so the calendar reads as pending rather than broken.")
+    return True
+
 
 def file_hash(filepath):
     if not os.path.exists(filepath):
@@ -377,34 +562,44 @@ def main():
             except Exception as e:
                 print(f"  Failed to fetch scraped menu ID: {e}")
 
-    # ── Step 3: Give up gracefully ─────────────────────────
+    # ── Step 3: No menu yet — publish placeholders instead ─
     if not target_menu:
-        print(f"\n{target_label} menu not available yet — keeping existing ICS unchanged.")
+        print(f"\n{target_label} menu not available yet.")
+        for feed in active_feeds():
+            print(f"  [{feed['env']}] {feed['path']}")
+            if not write_placeholders(target_month, target_year,
+                                      feed["path"], feed["prefix"], feed["calname"]):
+                print("    No change.")
         print("Will retry at next scheduled run (10am or 6pm today, or tomorrow).")
-        notify_not_found("LCE AI Lunch Calendar", target_label)
+        notify_not_found(CALNAME, target_label)
         return
 
     # ── Generate and save ICS ──────────────────────────────
+    # One fetch, one parse, written to every active feed. Dev is generated from
+    # the same data as prod rather than from a separate source, so a bug in the
+    # real path shows up in dev instead of being masked by stand-in data.
     month = target_menu["month"]
     year = target_menu["year"]
-    print(f"\nGenerating ICS for: {datetime(year, month, 1).strftime('%B %Y')}")
+    month_label = datetime(year, month, 1).strftime("%B %Y")
+    print(f"\nGenerating ICS for: {month_label}")
 
     daily_menu = build_daily_menu(target_menu)
     print(f"Menu items found for {len(daily_menu)} school days")
 
-    ics_content = generate_ics(daily_menu, month, year, existing_ics_path=OUTPUT_ICS)
-
     os.makedirs("docs", exist_ok=True)
-    old_hash = file_hash(OUTPUT_ICS)
-    new_hash = hashlib.md5(ics_content.encode()).hexdigest()
-
-    if old_hash == new_hash:
-        print("No changes detected — ICS file is already up to date.")
-    else:
-        with open(OUTPUT_ICS, "w", encoding="utf-8") as f:
+    for feed in active_feeds():
+        ics_content = generate_ics(daily_menu, month, year,
+                                   existing_ics_path=feed["path"],
+                                   prefix=feed["prefix"], calname=feed["calname"])
+        if file_hash(feed["path"]) == hashlib.md5(ics_content.encode()).hexdigest():
+            print(f"  [{feed['env']}] {feed['path']} already up to date.")
+            continue
+        with open(feed["path"], "w", encoding="utf-8") as f:
             f.write(ics_content)
-        print(f"ICS file updated with {len(daily_menu)} events.")
-        notify_success("LCE AI Lunch Calendar", datetime(year, month, 1).strftime("%B %Y"), len(daily_menu))
+        print(f"  [{feed['env']}] {feed['path']} updated with {len(daily_menu)} events.")
+        # Only alert on the feed parents actually see; a dev-feed write is not news.
+        if feed["env"] == "prod":
+            notify_success(CALNAME, month_label, len(daily_menu))
 
     # Mark this month as successfully found so we stop retrying
     save_next_month_found(month, year)
