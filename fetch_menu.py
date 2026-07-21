@@ -25,8 +25,38 @@ LCUSD_MENU_URL = "https://nutrition.lcusd.net/index.php?sid=2506080150154913&pag
 SEED_MENU_ID = "698b7e94cc6f3104111f19e7"
 MENU_ID_FILE = "current_menu_id.txt"
 NEXT_MONTH_FOUND_FILE = "next_month_found.txt"
-OUTPUT_ICS = "docs/lunch.ics"
 EXCLUDE_CATEGORIES = {"Milk", "Condiment", "Extra"}
+
+# ─────────────────────────────────────────────
+# FEEDS — prod and dev are separate files
+# ─────────────────────────────────────────────
+# Prod and dev previously shared ONE ics file, so anything written while testing
+# was immediately live to paying parents — there was no staging step to "promote"
+# from, because there was only ever one artifact. That is how 25 hand-authored
+# "TEST:" events ended up being what a prod subscriber's calendar would show.
+#
+# Dev is a MIRROR, not a sandbox: same fetch, same parse, same generation, so a
+# bug in the real path actually reproduces there. The only difference is a
+# "[DEV] " prefix on every summary and on the calendar name, so when you're
+# subscribed to both you can tell at a glance which one you're looking at —
+# including after the real menu publishes, when the two would otherwise be
+# identical exactly when you're mid-troubleshoot.
+CALNAME = "LCE AI Lunch Calendar"
+DEV_PREFIX = "[DEV] "
+
+FEEDS = [
+    {"env": "prod", "path": "docs/lunch.ics",     "prefix": "",         "calname": CALNAME},
+    {"env": "dev",  "path": "docs/lunch-dev.ics", "prefix": DEV_PREFIX, "calname": DEV_PREFIX + CALNAME},
+]
+
+# DEV_ONLY=true writes just the dev feed, leaving prod untouched — the way to
+# watch a fix land in your own calendar before it reaches a parent's. The next
+# scheduled run writes both again and restores the mirror.
+def active_feeds():
+    if os.environ.get("DEV_ONLY", "false").lower() == "true":
+        print("DEV_ONLY=true — writing the dev feed only; prod will not be touched.")
+        return [f for f in FEEDS if f["env"] == "dev"]
+    return FEEDS
 
 # ─────────────────────────────────────────────
 # PLACEHOLDER EVENTS
@@ -282,13 +312,13 @@ def event_uid(date_str):
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, f"lcusd-lunch-{date_str}"))
 
 
-def build_placeholder_events(month, year, now):
+def build_placeholder_events(month, year, now, prefix=""):
     events = {}
     for day_date in school_days_in_month(month, year):
         date_str = day_date.strftime("%Y%m%d")
         events[date_str] = build_event(
             date_str, event_uid(date_str), now,
-            PLACEHOLDER_SUMMARY, PLACEHOLDER_DESCRIPTION, placeholder=True,
+            prefix + PLACEHOLDER_SUMMARY, PLACEHOLDER_DESCRIPTION, placeholder=True,
         )
     return events
 
@@ -309,7 +339,7 @@ def get_window_months(new_month, new_year):
     return window
 
 
-def generate_ics(daily_menu, month, year, existing_ics_path=None):
+def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", calname=CALNAME):
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
 
     # Determine the 4-month rolling window to keep
@@ -345,7 +375,7 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None):
     new_events = {}
     for day_date in sorted(daily_menu.keys()):
         items = daily_menu[day_date]
-        title = " | ".join(items) if items else "Lunch Menu"
+        title = prefix + (" | ".join(items) if items else "Lunch Menu")
         date_str = day_date.strftime("%Y%m%d")
         new_events[date_str] = build_event(
             date_str, event_uid(date_str), now,
@@ -361,7 +391,7 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None):
         "PRODID:-//LCUSD Elementary Lunch//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        "X-WR-CALNAME:LCE AI Lunch Calendar",
+        f"X-WR-CALNAME:{calname}",
         "X-WR-TIMEZONE:America/Los_Angeles",
         "X-PUBLISHED-TTL:PT4H",
     ]
@@ -369,7 +399,7 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None):
     footer = ["END:VCALENDAR"]
     return "\r\n".join(header + event_lines + footer)
 
-def write_placeholders(month, year):
+def write_placeholders(month, year, path, prefix="", calname=CALNAME):
     """Publish 'menu not posted yet' events for a month with no menu.
 
     Only ever ADDS to dates that have no event at all — never overwrites real
@@ -382,8 +412,8 @@ def write_placeholders(month, year):
         return False
 
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    existing = parse_existing_events(OUTPUT_ICS)
-    placeholders = build_placeholder_events(month, year, now)
+    existing = parse_existing_events(path)
+    placeholders = build_placeholder_events(month, year, now, prefix)
 
     # Skip any date that already has an event — real food, or a placeholder we
     # published earlier. Rebuilding an existing placeholder would only change its
@@ -401,7 +431,7 @@ def write_placeholders(month, year):
         "PRODID:-//LCUSD Elementary Lunch//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        "X-WR-CALNAME:LCE AI Lunch Calendar",
+        f"X-WR-CALNAME:{calname}",
         "X-WR-TIMEZONE:America/Los_Angeles",
         "X-PUBLISHED-TTL:PT4H",
     ]
@@ -410,11 +440,11 @@ def write_placeholders(month, year):
     )
 
     os.makedirs("docs", exist_ok=True)
-    if file_hash(OUTPUT_ICS) == hashlib.md5(content.encode()).hexdigest():
+    if file_hash(path) == hashlib.md5(content.encode()).hexdigest():
         print(f"  {label}: placeholders already published — no change.")
         return False
 
-    with open(OUTPUT_ICS, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(content)
     print(f"  Published {len(to_add)} placeholder(s) for {label} "
           f"so the calendar reads as pending rather than broken.")
@@ -535,34 +565,41 @@ def main():
     # ── Step 3: No menu yet — publish placeholders instead ─
     if not target_menu:
         print(f"\n{target_label} menu not available yet.")
-        wrote = write_placeholders(target_month, target_year)
-        if not wrote:
-            print("  No school days to hold — leaving the ICS unchanged.")
+        for feed in active_feeds():
+            print(f"  [{feed['env']}] {feed['path']}")
+            if not write_placeholders(target_month, target_year,
+                                      feed["path"], feed["prefix"], feed["calname"]):
+                print("    No change.")
         print("Will retry at next scheduled run (10am or 6pm today, or tomorrow).")
-        notify_not_found("LCE AI Lunch Calendar", target_label)
+        notify_not_found(CALNAME, target_label)
         return
 
     # ── Generate and save ICS ──────────────────────────────
+    # One fetch, one parse, written to every active feed. Dev is generated from
+    # the same data as prod rather than from a separate source, so a bug in the
+    # real path shows up in dev instead of being masked by stand-in data.
     month = target_menu["month"]
     year = target_menu["year"]
-    print(f"\nGenerating ICS for: {datetime(year, month, 1).strftime('%B %Y')}")
+    month_label = datetime(year, month, 1).strftime("%B %Y")
+    print(f"\nGenerating ICS for: {month_label}")
 
     daily_menu = build_daily_menu(target_menu)
     print(f"Menu items found for {len(daily_menu)} school days")
 
-    ics_content = generate_ics(daily_menu, month, year, existing_ics_path=OUTPUT_ICS)
-
     os.makedirs("docs", exist_ok=True)
-    old_hash = file_hash(OUTPUT_ICS)
-    new_hash = hashlib.md5(ics_content.encode()).hexdigest()
-
-    if old_hash == new_hash:
-        print("No changes detected — ICS file is already up to date.")
-    else:
-        with open(OUTPUT_ICS, "w", encoding="utf-8") as f:
+    for feed in active_feeds():
+        ics_content = generate_ics(daily_menu, month, year,
+                                   existing_ics_path=feed["path"],
+                                   prefix=feed["prefix"], calname=feed["calname"])
+        if file_hash(feed["path"]) == hashlib.md5(ics_content.encode()).hexdigest():
+            print(f"  [{feed['env']}] {feed['path']} already up to date.")
+            continue
+        with open(feed["path"], "w", encoding="utf-8") as f:
             f.write(ics_content)
-        print(f"ICS file updated with {len(daily_menu)} events.")
-        notify_success("LCE AI Lunch Calendar", datetime(year, month, 1).strftime("%B %Y"), len(daily_menu))
+        print(f"  [{feed['env']}] {feed['path']} updated with {len(daily_menu)} events.")
+        # Only alert on the feed parents actually see; a dev-feed write is not news.
+        if feed["env"] == "prod":
+            notify_success(CALNAME, month_label, len(daily_menu))
 
     # Mark this month as successfully found so we stop retrying
     save_next_month_found(month, year)
