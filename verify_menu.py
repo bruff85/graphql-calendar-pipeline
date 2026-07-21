@@ -16,18 +16,18 @@ WHAT IT CHECKS
     3. Does that id come back from the GraphQL API with items?
     4. Does the API's month field line up with the month requested?
 
-Step 4 is the one to watch. The API reports months 0-INDEXED (May = 4), so a
-menu that looks "one month behind" is normal and expected. A menu that lines up
-exactly is the suspicious case — see docs in lunchlook-backend/docs/MENU_PIPELINE.md.
+Step 4 is the one to watch. The API reports months 0-INDEXED (May = 4), but
+fetch_menu() now normalises that at the boundary, so by the time a menu reaches
+here its month should match what you asked for. A mismatch means the
+normalisation broke or the API changed convention — either way, investigate
+before trusting the feed. See lunchlook-backend/docs/MENU_PIPELINE.md.
 """
 
 import calendar
 import sys
 from datetime import date
 
-import requests
-
-from fetch_menu import GRAPHQL_URL, QUERY, scrape_menu_id_from_website
+from fetch_menu import fetch_menu, scrape_menu_id_from_website
 
 # Verified 2026-07-21 by hand against the district site and the GraphQL API.
 KNOWN_GOOD = {
@@ -42,13 +42,9 @@ WRONG_MENUS = {
 
 
 def fetch(menu_id):
-    r = requests.post(GRAPHQL_URL, json={"query": QUERY % menu_id},
-                      headers={"Content-Type": "application/json"}, timeout=30)
-    r.raise_for_status()
-    payload = r.json()
-    if "errors" in payload:
-        raise ValueError(payload["errors"])
-    return payload["data"]["menu"]
+    """Goes through fetch_menu so we verify exactly what the pipeline sees,
+    including the 0-indexed-month normalisation."""
+    return fetch_menu(menu_id)
 
 
 def check(month, year, expect=None):
@@ -75,15 +71,15 @@ def check(month, year, expect=None):
     api_month = menu["month"]
 
     print(f"  menu id     : {menu_id}")
-    print(f"  API month   : {api_month} (0-indexed -> {calendar.month_name[api_month + 1]})")
+    print(f"  month       : {api_month} ({calendar.month_name[api_month]}) after normalisation")
     print(f"  items / days: {len(items)} items across {len(days)} school days")
     print(f"  day numbers : {days}")
 
-    if api_month + 1 != month:
-        print(f"  WARNING: API says {calendar.month_name[api_month + 1]}, "
+    if api_month != month:
+        print(f"  WARNING: this menu is {calendar.month_name[api_month]}, "
               f"you asked for {calendar.month_name[month]}.")
-        print("           The relabel heuristic would stamp this with the target")
-        print("           month and publish the WRONG food. Investigate.")
+        print("           Month normalisation may have broken, or the API changed")
+        print("           convention. Do NOT trust the feed until this is explained.")
         return False
 
     print("\n  Spot-check these against the district's published PDF:")
