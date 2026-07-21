@@ -6,4 +6,134 @@ METHOD:PUBLISH
 X-WR-CALNAME:LCE AI Lunch Calendar
 X-WR-TIMEZONE:America/Los_Angeles
 X-PUBLISHED-TTL:PT4H
+BEGIN:VEVENT
+UID:e5492064-ec7e-5d41-896e-9d813bc923ca
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260813T113000
+DTEND;TZID=America/Los_Angeles:20260813T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:c21affdb-f1f4-58d1-8373-7bfc5038d9e2
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260814T113000
+DTEND;TZID=America/Los_Angeles:20260814T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:9021a502-b6d3-5345-a426-d14d57f30915
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260817T113000
+DTEND;TZID=America/Los_Angeles:20260817T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:57650d0a-4b4e-5527-a69c-ff031c2e174f
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260818T113000
+DTEND;TZID=America/Los_Angeles:20260818T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:a05c8cec-53c5-51a0-b11a-1dc5a688abfd
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260819T113000
+DTEND;TZID=America/Los_Angeles:20260819T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:caedf98a-1164-5c00-a545-ab0a729ccdac
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260820T113000
+DTEND;TZID=America/Los_Angeles:20260820T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:45786aaf-5014-5c0c-b265-c38462fb83b3
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260821T113000
+DTEND;TZID=America/Los_Angeles:20260821T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:f6f04925-8e1d-56ca-b03e-acf809f44418
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260824T113000
+DTEND;TZID=America/Los_Angeles:20260824T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:f4f5de69-3df7-5252-b015-acb0fbe41b83
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260825T113000
+DTEND;TZID=America/Los_Angeles:20260825T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:78263401-64bf-5618-9875-46193b80e6db
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260826T113000
+DTEND;TZID=America/Los_Angeles:20260826T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:2923b220-72a6-5c84-8411-48ba692cbc46
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260827T113000
+DTEND;TZID=America/Los_Angeles:20260827T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:955ba30f-7461-50cf-b11f-516f21f7335e
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260828T113000
+DTEND;TZID=America/Los_Angeles:20260828T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
+BEGIN:VEVENT
+UID:e337b342-489b-5cf0-8df0-f0116b04e0a4
+DTSTAMP:20260721T205240Z
+DTSTART;TZID=America/Los_Angeles:20260831T113000
+DTEND;TZID=America/Los_Angeles:20260831T123000
+SUMMARY:Lunch menu not posted yet
+DESCRIPTION:The district hasn't published this month's lunch menu yet. This will fill in automatically once they do - nothing for you to do. - LunchLook
+TRANSP:TRANSPARENT
+X-LUNCHLOOK-PLACEHOLDER:1
+END:VEVENT
 END:VCALENDAR
