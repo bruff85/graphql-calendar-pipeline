@@ -100,6 +100,85 @@ def fetch_menu(menu_id):
     return data["data"]["menu"]
 
 
+# Which menu we want, and how to recognise it on the page.
+# LCUSD groups menus under an <h3> per level, each holding a "Breakfast Menu"
+# and a "Lunch Menu" link. Both carry the SAME siteCode, so the site code alone
+# cannot tell breakfast from lunch — the heading and link text are what
+# disambiguate. Elementary is siteCode 24701; secondary 7-12 is 25235/24702 and
+# shares one menu across both (see docs/ in lunchlook-backend: MENU_PIPELINE.md).
+TARGET_SECTION = "Elementary School"
+TARGET_LINK_TEXT = "Lunch Menu"
+TARGET_SITE_CODE = "24701"
+
+DOWNLOAD_LINK_RE = re.compile(
+    r'<a\s+href="(/downloadMenu\.php/[^"]+)"[^>]*>\s*([^<]+?)\s*</a>', re.IGNORECASE
+)
+SECTION_RE = re.compile(r"<h3[^>]*>\s*([^<]+?)\s*</h3>", re.IGNORECASE)
+
+
+def _resolve_download_link(path):
+    """Follow a /downloadMenu.php/... link one hop and pull the menu id out of it.
+
+    The redesigned site no longer prints the 24-hex menu id in the page HTML.
+    It emits a numeric download link that 302s to the familiar viewer URL:
+        .../webmenus2/#/view?id=<24hex>&siteCode=<code>
+    Returns (menu_id, site_code), either of which may be None.
+    """
+    try:
+        resp = requests.get(
+            f"https://nutrition.lcusd.net{path}",
+            timeout=30,
+            allow_redirects=False,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; LunchCalendarBot/1.0)"},
+        )
+    except requests.RequestException as e:
+        print(f"    Could not resolve {path}: {e}")
+        return None, None
+
+    location = resp.headers.get("Location", "")
+    menu_id = re.search(r"id=([a-f0-9]{24})", location, re.IGNORECASE)
+    site_code = re.search(r"siteCode=(\d+)", location, re.IGNORECASE)
+    return (menu_id.group(1) if menu_id else None,
+            site_code.group(1) if site_code else None)
+
+
+def scrape_via_download_links(html):
+    """Find the elementary LUNCH menu id on the redesigned nutrition site.
+
+    Walks the page in order, tracking the most recent <h3> heading, so a link is
+    only considered once we're inside the Elementary section. Guards on the site
+    code as a final check: if the district ever reorders the page, we'd rather
+    return nothing (and alert) than silently publish the wrong menu.
+    """
+    markers = [(m.start(), "section", m.group(1)) for m in SECTION_RE.finditer(html)]
+    markers += [(m.start(), "link", (m.group(1), m.group(2))) for m in DOWNLOAD_LINK_RE.finditer(html)]
+    markers.sort()
+
+    section = None
+    for _, kind, value in markers:
+        if kind == "section":
+            section = value
+            continue
+        path, text = value
+        if section != TARGET_SECTION or TARGET_LINK_TEXT.lower() not in text.lower():
+            continue
+
+        print(f"  Found '{section}' / '{text}' -> {path}")
+        menu_id, site_code = _resolve_download_link(path)
+        if not menu_id:
+            print("    Link did not redirect to a menu id.")
+            return None
+        if site_code != TARGET_SITE_CODE:
+            print(f"    REFUSING: expected siteCode {TARGET_SITE_CODE}, got {site_code}. "
+                  f"Page layout may have changed — not guessing.")
+            return None
+        print(f"  Resolved menu ID: {menu_id} (siteCode {site_code})")
+        return menu_id
+
+    print(f"  No '{TARGET_SECTION}' / '{TARGET_LINK_TEXT}' download link on the page.")
+    return None
+
+
 def scrape_menu_id_from_website(month, year):
     url = LCUSD_MENU_URL.format(month=month, year=year)
     print(f"  Scraping LCUSD site for {month}/{year}: {url}")
@@ -112,6 +191,16 @@ def scrape_menu_id_from_website(month, year):
         if "No menus published for this month" in html:
             print(f"  Site confirms: no menus published for {month}/{year} yet.")
             return None
+
+        # Current site structure (July 2026 redesign) — try this first.
+        menu_id = scrape_via_download_links(html)
+        if menu_id:
+            return menu_id
+
+        # Legacy inline patterns, kept in case the district reverts or a cached
+        # page is served. NOTE: these match breakfast as readily as lunch, since
+        # both share siteCode 24701 — they are a last resort, not a peer.
+        print("  Falling back to legacy inline patterns...")
         patterns = [
             r'webmenus2[^"]*id=([a-f0-9]{24})[^"]*siteCode=24701',
             r'id=([a-f0-9]{24})[^"]*siteCode=24701',
