@@ -398,6 +398,46 @@ def school_days_in_month(month, year):
     return days
 
 
+def ics_escape(text):
+    """Escape a value for an ICS TEXT field (RFC 5545).
+
+    Backslash MUST be escaped first, or it double-escapes the sequences added
+    after it. Newlines become a literal '\\n'; commas and semicolons are value
+    separators in ICS and must be escaped inside a TEXT value. Skipping this
+    silently corrupts the feed the moment a menu item contains a comma.
+    """
+    return (text.replace("\\", "\\\\")
+                .replace(";", "\\;")
+                .replace(",", "\\,")
+                .replace("\n", "\\n"))
+
+
+def build_menu_description(items, day_date):
+    """The event NOTES for a real menu day.
+
+    The TITLE stays the full item list (the data source doesn't categorise
+    items, and sides are interleaved with entrees as combo meals, so there is no
+    reliable way to split "mains" from "sides" — see docs/MENU_PIPELINE.md). The
+    notes carry the same list in a readable form PLUS a link to the district's
+    own published menu for THIS event's month — which is where the truly extra
+    items (milk, fruit) live, since the feed never receives those, and which
+    lets a parent verify the day against the source themselves.
+    """
+    month_label = day_date.strftime("%B %Y")
+    url = LCUSD_MENU_URL.format(month=day_date.month, year=day_date.year)
+    parts = []
+    if items:
+        parts.append(" · ".join(items))
+        parts.append("")
+    parts.append(f"Full published menu for {month_label} "
+                 f"(milk, fruit & anything not shown above):")
+    parts.append(url)
+    parts.append("")
+    parts.append("Menus follow the school's published calendar; "
+                 "actual meals may vary. Confirm with your school.")
+    return ics_escape("\n".join(parts))
+
+
 def build_event(date_str, uid, now, summary, description, placeholder=False):
     lines = [
         "BEGIN:VEVENT",
@@ -488,7 +528,7 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", cal
         date_str = day_date.strftime("%Y%m%d")
         new_events[date_str] = build_event(
             date_str, event_uid(date_str), now,
-            title, "LCUSD Elementary School Lunch Menu",
+            title, build_menu_description(items, day_date),
         )
 
     # Merge: new month overrides any existing events for same dates
