@@ -398,6 +398,62 @@ def school_days_in_month(month, year):
     return days
 
 
+def ics_escape(text):
+    """Escape a value for an ICS TEXT field (RFC 5545).
+
+    Backslash MUST be escaped first, or it double-escapes the sequences added
+    after it. Newlines become a literal '\\n'; commas and semicolons are value
+    separators in ICS and must be escaped inside a TEXT value. Skipping this
+    silently corrupts the feed the moment a menu item contains a comma.
+    """
+    return (text.replace("\\", "\\\\")
+                .replace(";", "\\;")
+                .replace(",", "\\,")
+                .replace("\n", "\\n"))
+
+
+# Direct link to the EXACT menu that generated these events — the webmenus2
+# viewer opened straight to that menu id + the elementary site code. This is
+# where the LCUSD_MENU_URL page redirects to once you pick a month and school;
+# linking here skips that picker so a parent lands on the menu itself, and it
+# points at the precise source we used (same menu id the ICS was built from).
+SNF_MENU_VIEW_URL = ("https://www.schoolnutritionandfitness.com/webmenus2/"
+                     "#/view?id={menu_id}&siteCode={site_code}")
+
+
+def build_menu_description(items, day_date, menu_id=None):
+    """The event NOTES for a real menu day.
+
+    The TITLE stays the full item list (the data source doesn't categorise
+    items, and sides are interleaved with entrees as combo meals, so there is no
+    reliable way to split "mains" from "sides" — see docs/MENU_PIPELINE.md). The
+    notes carry the same list in a readable form PLUS a link to the district's
+    own published menu — which is where the truly extra items (milk, fruit)
+    live, since the feed never receives those, and which lets a parent verify
+    the day against the source themselves.
+
+    menu_id links straight to the exact source menu (one tap to the menu).
+    Without it we fall back to the month picker page, which still works but adds
+    a click — so the link is always present, just better when we have the id.
+    """
+    month_label = day_date.strftime("%B %Y")
+    if menu_id:
+        url = SNF_MENU_VIEW_URL.format(menu_id=menu_id, site_code=TARGET_SITE_CODE)
+    else:
+        url = LCUSD_MENU_URL.format(month=day_date.month, year=day_date.year)
+    parts = []
+    if items:
+        parts.append(" · ".join(items))
+        parts.append("")
+    parts.append(f"Full published menu for {month_label} "
+                 f"(milk, fruit & anything not shown above):")
+    parts.append(url)
+    parts.append("")
+    parts.append("Menus follow the school's published calendar; "
+                 "actual meals may vary. Confirm with your school.")
+    return ics_escape("\n".join(parts))
+
+
 def build_event(date_str, uid, now, summary, description, placeholder=False):
     lines = [
         "BEGIN:VEVENT",
@@ -448,7 +504,7 @@ def get_window_months(new_month, new_year):
     return window
 
 
-def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", calname=CALNAME):
+def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", calname=CALNAME, menu_id=None):
     now = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
 
     # Determine the 4-month rolling window to keep
@@ -488,7 +544,7 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", cal
         date_str = day_date.strftime("%Y%m%d")
         new_events[date_str] = build_event(
             date_str, event_uid(date_str), now,
-            title, "LCUSD Elementary School Lunch Menu",
+            title, build_menu_description(items, day_date, menu_id),
         )
 
     # Merge: new month overrides any existing events for same dates
@@ -724,7 +780,8 @@ def main():
     for feed in active_feeds():
         ics_content = generate_ics(daily_menu, month, year,
                                    existing_ics_path=feed["path"],
-                                   prefix=feed["prefix"], calname=feed["calname"])
+                                   prefix=feed["prefix"], calname=feed["calname"],
+                                   menu_id=target_menu.get("id"))
         if file_hash(feed["path"]) == hashlib.md5(ics_content.encode()).hexdigest():
             print(f"  [{feed['env']}] {feed['path']} already up to date.")
             continue
