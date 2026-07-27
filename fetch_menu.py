@@ -89,7 +89,11 @@ NO_SCHOOL_DATES = {
     date(2026, 11, 11),  # Veterans Day
 }
 
-PLACEHOLDER_SUMMARY = "Lunch menu not posted yet"
+# Placeholder TITLE. Reassures on two fronts a parent needs before the menu is
+# out: the calendar is working (there IS an entry), and it will fill itself in
+# (no action needed). Short enough not to truncate in month view; the notes
+# below carry the fuller "nothing for you to do" reassurance.
+PLACEHOLDER_SUMMARY = "Menu updates when posted"
 PLACEHOLDER_DESCRIPTION = (
     "The district hasn't published this month's lunch menu yet. "
     "This will fill in automatically once they do - nothing for you to do. - LunchLook"
