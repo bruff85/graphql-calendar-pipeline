@@ -99,8 +99,9 @@ ATTRIBUTION = ("Brought to you by LunchLook — every subscription helps fund "
 
 PLACEHOLDER_SUMMARY = "Lunch menu not posted yet"
 PLACEHOLDER_DESCRIPTION = (
-    "The district hasn't published this month's lunch menu yet. "
-    "This will fill in automatically once they do - nothing for you to do. "
+    "The district hasn't posted this month's menu yet - they usually put it up "
+    "about a week before the month starts. It'll fill in automatically once they "
+    "do; nothing for you to do. "
     + ATTRIBUTION
 )
 # Marks an event as ours to remove later. Without a marker the cleanup pass would
