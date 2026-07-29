@@ -89,10 +89,19 @@ NO_SCHOOL_DATES = {
     date(2026, 11, 11),  # Veterans Day
 }
 
+# Rides on every event's notes so any copy a subscriber re-shares (e.g. Google
+# Calendar's "make public") still carries our brand + the school-donation ask.
+# The menu data is public, so it can't be locked down — this is the one lever
+# that turns a re-shared copy into attribution + a signup nudge instead of
+# silent free convenience.
+ATTRIBUTION = ("Brought to you by LunchLook — every subscription helps fund "
+               "La Cañada schools. lunchlook.com")
+
 PLACEHOLDER_SUMMARY = "Lunch menu not posted yet"
 PLACEHOLDER_DESCRIPTION = (
     "The district hasn't published this month's lunch menu yet. "
-    "This will fill in automatically once they do - nothing for you to do. - LunchLook"
+    "This will fill in automatically once they do - nothing for you to do. "
+    + ATTRIBUTION
 )
 # Marks an event as ours to remove later. Without a marker the cleanup pass would
 # have to match on summary text, which breaks the moment the wording changes.
@@ -451,6 +460,8 @@ def build_menu_description(items, day_date, menu_id=None):
     parts.append("")
     parts.append("Menus follow the school's published calendar; "
                  "actual meals may vary. Confirm with your school.")
+    parts.append("")
+    parts.append(ATTRIBUTION)
     return ics_escape("\n".join(parts))
 
 
