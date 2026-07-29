@@ -41,7 +41,7 @@ EXCLUDE_CATEGORIES = {"Milk", "Condiment", "Extra"}
 # subscribed to both you can tell at a glance which one you're looking at —
 # including after the real menu publishes, when the two would otherwise be
 # identical exactly when you're mid-troubleshoot.
-CALNAME = "LCE AI Lunch Calendar"
+CALNAME = "LunchLook Calendar"
 DEV_PREFIX = "[DEV] "
 
 FEEDS = [
