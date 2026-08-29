@@ -94,8 +94,13 @@ NO_SCHOOL_DATES = {
 # The menu data is public, so it can't be locked down — this is the one lever
 # that turns a re-shared copy into attribution + a signup nudge instead of
 # silent free convenience.
+# The domain here is load-bearing, not decoration. lunchlook.com is a GoDaddy
+# placeholder being retired (lunchlook-backend ARCHITECTURE.md §4); the site that
+# can actually take a signup is yourcampusconcierge.com. Pointing the one signup
+# nudge we get at a page that sells nothing defeats the whole purpose of this
+# string. LunchLook stays as the product name — only the address changed.
 ATTRIBUTION = ("Brought to you by LunchLook — every subscription helps fund "
-               "La Cañada schools. lunchlook.com")
+               "La Cañada schools. Subscribe at yourcampusconcierge.com")
 
 PLACEHOLDER_SUMMARY = "Lunch menu not posted yet"
 PLACEHOLDER_DESCRIPTION = (
