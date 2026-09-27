@@ -7,123 +7,6 @@ X-WR-CALNAME:LunchLook Calendar
 X-WR-TIMEZONE:America/Los_Angeles
 X-PUBLISHED-TTL:PT4H
 BEGIN:VEVENT
-UID:e5492064-ec7e-5d41-896e-9d813bc923ca
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260813T113000
-DTEND;TZID=America/Los_Angeles:20260813T123000
-SUMMARY:Mushroom Pizza | Cheese Pizza | Classic Pepperoni Pizza | Side Salad
-DESCRIPTION:Mushroom Pizza · Cheese Pizza · Classic Pepperoni Pizza · Side Salad\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:c21affdb-f1f4-58d1-8373-7bfc5038d9e2
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260814T113000
-DTEND;TZID=America/Los_Angeles:20260814T123000
-SUMMARY:WG Grilled Cheese Sandwich | Chicken Nuggets | Tater Tots | Broccoli
-DESCRIPTION:WG Grilled Cheese Sandwich · Chicken Nuggets · Tater Tots · Broccoli\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:9021a502-b6d3-5345-a426-d14d57f30915
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260817T113000
-DTEND;TZID=America/Los_Angeles:20260817T123000
-SUMMARY:Cheese Quesadilla | Beef Nachos | Corn
-DESCRIPTION:Cheese Quesadilla · Beef Nachos · Corn\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:57650d0a-4b4e-5527-a69c-ff031c2e174f
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260818T113000
-DTEND;TZID=America/Los_Angeles:20260818T123000
-SUMMARY:Classic American Cheeseburger * | Turkey Hot Dog | French Fries | Baked Beans
-DESCRIPTION:Classic American Cheeseburger * · Turkey Hot Dog · French Fries · Baked Beans\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:a05c8cec-53c5-51a0-b11a-1dc5a688abfd
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260819T113000
-DTEND;TZID=America/Los_Angeles:20260819T123000
-SUMMARY:Alfredo Chicken Pasta Alfredo | Baked Mozzarella Cheese Sticks | Marinara Sauce | Green Beans
-DESCRIPTION:Alfredo Chicken Pasta Alfredo · Baked Mozzarella Cheese Sticks · Marinara Sauce · Green Beans\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:caedf98a-1164-5c00-a545-ab0a729ccdac
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260820T113000
-DTEND;TZID=America/Los_Angeles:20260820T123000
-SUMMARY:BBQ Chicken Pizza | Cheese Pizza | Classic Pepperoni Pizza | Side Salad
-DESCRIPTION:BBQ Chicken Pizza · Cheese Pizza · Classic Pepperoni Pizza · Side Salad\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:45786aaf-5014-5c0c-b265-c38462fb83b3
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260821T113000
-DTEND;TZID=America/Los_Angeles:20260821T123000
-SUMMARY:Chicken Biscuit Sandwich | French Fries | Chef Jet's Orange Chicken | Asian Rice | Broccoli
-DESCRIPTION:Chicken Biscuit Sandwich · French Fries · Chef Jet's Orange Chicken · Asian Rice · Broccoli\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:f6f04925-8e1d-56ca-b03e-acf809f44418
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260824T113000
-DTEND;TZID=America/Los_Angeles:20260824T123000
-SUMMARY:Beef, Bean & Cheese Burrito | Chicken and Waffle | Strawberries
-DESCRIPTION:Beef\, Bean & Cheese Burrito · Chicken and Waffle · Strawberries\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:f4f5de69-3df7-5252-b015-acb0fbe41b83
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260825T113000
-DTEND;TZID=America/Los_Angeles:20260825T123000
-SUMMARY:Classic American Cheeseburger * | Chicken Corn Dog | French Fries | Baked Beans
-DESCRIPTION:Classic American Cheeseburger * · Chicken Corn Dog · French Fries · Baked Beans\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:78263401-64bf-5618-9875-46193b80e6db
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260826T113000
-DTEND;TZID=America/Los_Angeles:20260826T123000
-SUMMARY:Macaroni and Cheese | Chicken Meatball Sub | Green Peas
-DESCRIPTION:Macaroni and Cheese · Chicken Meatball Sub · Green Peas\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:2923b220-72a6-5c84-8411-48ba692cbc46
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260827T113000
-DTEND;TZID=America/Los_Angeles:20260827T123000
-SUMMARY:Hawaiian Pizza | Cheese Pizza | Classic Pepperoni Pizza | Side Salad
-DESCRIPTION:Hawaiian Pizza · Cheese Pizza · Classic Pepperoni Pizza · Side Salad\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:955ba30f-7461-50cf-b11f-516f21f7335e
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260828T113000
-DTEND;TZID=America/Los_Angeles:20260828T123000
-SUMMARY:Chef Jet's Orange Chicken | Asian Rice | BBQ Chicken Sandwich
-DESCRIPTION:Chef Jet's Orange Chicken · Asian Rice · BBQ Chicken Sandwich\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:e337b342-489b-5cf0-8df0-f0116b04e0a4
-DTSTAMP:20260804T195448Z
-DTSTART;TZID=America/Los_Angeles:20260831T113000
-DTEND;TZID=America/Los_Angeles:20260831T123000
-SUMMARY:WG Grilled Cheese Sandwich | Mashed Potato & Popcorn Chicken Bowl
-DESCRIPTION:WG Grilled Cheese Sandwich · Mashed Potato & Popcorn Chicken Bowl\n\nFull published menu for August 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c821d9cdfd5991413dbc&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
 UID:cde5bfbc-1779-5267-8db7-e92231ffdb49
 DTSTAMP:20260827T234821Z
 DTSTART;TZID=America/Los_Angeles:20260901T113000
@@ -310,6 +193,195 @@ DTSTART;TZID=America/Los_Angeles:20260930T113000
 DTEND;TZID=America/Los_Angeles:20260930T123000
 SUMMARY:Cheesy Baked Pasta | Chicken Biscuit Sandwich | French Fries
 DESCRIPTION:Cheesy Baked Pasta · Chicken Biscuit Sandwich · French Fries\n\nFull published menu for September 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c8eff30b2c7c0b3ebb26&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:b0800e70-b3fa-54dd-a0d6-02a4c0473ae0
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261001T113000
+DTEND;TZID=America/Los_Angeles:20261001T123000
+SUMMARY:Italian Sausage Pizza | Cheese Pizza | Classic Pepperoni Pizza | Side Salad
+DESCRIPTION:Italian Sausage Pizza · Cheese Pizza · Classic Pepperoni Pizza · Side Salad\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:62452689-bd55-5847-94a5-682114f0376b
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261002T113000
+DTEND;TZID=America/Los_Angeles:20261002T123000
+SUMMARY:WG Grilled Cheese Sandwich | Creamy Tomato Soup | Chicken Nuggets | Tater Tots
+DESCRIPTION:WG Grilled Cheese Sandwich · Creamy Tomato Soup · Chicken Nuggets · Tater Tots\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:2676cc0e-e20d-5f4e-8411-ef3ab471c4c0
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261005T113000
+DTEND;TZID=America/Los_Angeles:20261005T123000
+SUMMARY:Cheese Quesadilla | Teriyaki Beef Dippers | Asian Rice
+DESCRIPTION:Cheese Quesadilla · Teriyaki Beef Dippers · Asian Rice\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:4de28d79-c45c-543b-8686-1ea8f6accab9
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261006T113000
+DTEND;TZID=America/Los_Angeles:20261006T123000
+SUMMARY:Classic American Cheeseburger * | Chicken Corn Dog | French Fries | Baked Beans
+DESCRIPTION:Classic American Cheeseburger * · Chicken Corn Dog · French Fries · Baked Beans\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d039bb9a-8fa1-5979-8e8d-b91a450089fc
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261007T113000
+DTEND;TZID=America/Los_Angeles:20261007T123000
+SUMMARY:Alfredo Chicken Pasta Alfredo | Chicken Tenders | French Fries | Mixed Vegetable Medley
+DESCRIPTION:Alfredo Chicken Pasta Alfredo · Chicken Tenders · French Fries · Mixed Vegetable Medley\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:35507a86-7cf9-5edd-8538-f9af9c9591ec
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261008T113000
+DTEND;TZID=America/Los_Angeles:20261008T123000
+SUMMARY:Mushroom Pizza | Cheese Pizza | Classic Pepperoni Pizza | Side Salad
+DESCRIPTION:Mushroom Pizza · Cheese Pizza · Classic Pepperoni Pizza · Side Salad\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:ed046aea-ee49-5d41-97af-f51579e80106
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261009T113000
+DTEND;TZID=America/Los_Angeles:20261009T123000
+SUMMARY:Teriyaki Chicken Noodle Bowl | Waffles | Pork Sausage Patty | Strawberries
+DESCRIPTION:Teriyaki Chicken Noodle Bowl · Waffles · Pork Sausage Patty · Strawberries\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:52b7fa71-3292-5ebb-800d-f34cfcc1692f
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261012T113000
+DTEND;TZID=America/Los_Angeles:20261012T123000
+SUMMARY:Chicken Meatball Sub | French Fries | Mashed Potato & Chicken Bowl | Buttermilk Coleslaw
+DESCRIPTION:Chicken Meatball Sub · French Fries · Mashed Potato & Chicken Bowl · Buttermilk Coleslaw\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fe6510c2-e8b0-5023-afbd-a537f1df5247
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261013T113000
+DTEND;TZID=America/Los_Angeles:20261013T123000
+SUMMARY:Classic American Cheeseburger * | Turkey Hot Dog | French Fries | Baked Beans
+DESCRIPTION:Classic American Cheeseburger * · Turkey Hot Dog · French Fries · Baked Beans\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fced4fdc-c973-5a08-94d7-1fa66b79186a
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261014T113000
+DTEND;TZID=America/Los_Angeles:20261014T123000
+SUMMARY:Rotini Tossed in Italian Meat Sauce | Baked Mozzarella Cheese Sticks | Marinara Sauce | Green Beans
+DESCRIPTION:Rotini Tossed in Italian Meat Sauce · Baked Mozzarella Cheese Sticks · Marinara Sauce · Green Beans\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:97d7903a-9d06-5d13-876a-635c7c0b3055
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261015T113000
+DTEND;TZID=America/Los_Angeles:20261015T123000
+SUMMARY:Hawaiian Pizza | Cheese Pizza | Classic Pepperoni Pizza | Side Salad
+DESCRIPTION:Hawaiian Pizza · Cheese Pizza · Classic Pepperoni Pizza · Side Salad\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:479766de-c4af-5d5a-ab7f-78424eac9807
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261016T113000
+DTEND;TZID=America/Los_Angeles:20261016T123000
+SUMMARY:Chicken and Vegetable Dumplings | Asian Rice | BBQ Chicken Sandwich | Sweet Potato Fries
+DESCRIPTION:Chicken and Vegetable Dumplings · Asian Rice · BBQ Chicken Sandwich · Sweet Potato Fries\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:58da9f88-b0aa-5d9f-82ff-f483b40e4345
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261020T113000
+DTEND;TZID=America/Los_Angeles:20261020T123000
+SUMMARY:Classic American Cheeseburger * | French Fries
+DESCRIPTION:Classic American Cheeseburger * · French Fries\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:ed66ccf8-0f49-55d8-a7c1-11ebcacff615
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261021T113000
+DTEND;TZID=America/Los_Angeles:20261021T123000
+SUMMARY:Chicken Tenders | Tater Tots
+DESCRIPTION:Chicken Tenders · Tater Tots\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:f7318dd2-b49d-5154-83c6-3ac7221611ff
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261022T113000
+DTEND;TZID=America/Los_Angeles:20261022T123000
+SUMMARY:Cheese Pizza | Side Salad
+DESCRIPTION:Cheese Pizza · Side Salad\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:de60a41e-aca8-5fde-a24c-818a8c79f209
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261023T113000
+DTEND;TZID=America/Los_Angeles:20261023T123000
+SUMMARY:Deli Ham Sub | Turkey Sub
+DESCRIPTION:Deli Ham Sub · Turkey Sub\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:73775144-34de-5f15-b36c-d8df19774b18
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261026T113000
+DTEND;TZID=America/Los_Angeles:20261026T123000
+SUMMARY:Macaroni and Cheese | Chicken Nachos | Corn
+DESCRIPTION:Macaroni and Cheese · Chicken Nachos · Corn\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:eabd541e-5194-510c-a2bc-4455d906d27b
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261027T113000
+DTEND;TZID=America/Los_Angeles:20261027T123000
+SUMMARY:Classic American Cheeseburger * | Turkey Hot Dog | French Fries | Baked Beans
+DESCRIPTION:Classic American Cheeseburger * · Turkey Hot Dog · French Fries · Baked Beans\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:ebe5a1c7-270a-5dd5-86a0-3d10f4f8a29d
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261028T113000
+DTEND;TZID=America/Los_Angeles:20261028T123000
+SUMMARY:Spaghetti with Meatballs | Chicken Biscuit Sandwich
+DESCRIPTION:Spaghetti with Meatballs · Chicken Biscuit Sandwich\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:73ec3edc-96fa-5323-922a-be20d4f0f0d6
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261029T113000
+DTEND;TZID=America/Los_Angeles:20261029T123000
+SUMMARY:BBQ Chicken Pizza | Classic Pepperoni Pizza | Cheese Pizza | Side Salad
+DESCRIPTION:BBQ Chicken Pizza · Classic Pepperoni Pizza · Cheese Pizza · Side Salad\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:0ce73dd4-4523-56d3-a970-2bd5f000bd57
+DTSTAMP:20260927T080914Z
+DTSTART;TZID=America/Los_Angeles:20261030T113000
+DTEND;TZID=America/Los_Angeles:20261030T123000
+SUMMARY:Beef Nachos | Chef Jet's Orange Chicken | Asian Rice
+DESCRIPTION:Beef Nachos · Chef Jet's Orange Chicken · Asian Rice\n\nFull published menu for October 2026 (milk\, fruit & anything not shown above):\nhttps://www.schoolnutritionandfitness.com/webmenus2/#/view?id=6a29c91ad9ef6b6a0f6adf74&siteCode=24701\n\nMenus follow the school's published calendar\; actual meals may vary. Confirm with your school.\n\nBrought to you by LunchLook — every subscription helps fund La Cañada schools. lunchlook.com
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR
