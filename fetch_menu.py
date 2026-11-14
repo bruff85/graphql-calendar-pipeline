@@ -82,22 +82,30 @@ SPRING_SEMESTER_START = date(2027, 1, 5)
 # LCUSD Elementary School Calendar 2026-2027 (legal holidays, pupil free days,
 # school breaks) on 2026-11-13. UPDATE EACH YEAR.
 NO_SCHOOL_DATES = {
-    date(2026, 9, 7),    # Labor Day
-    date(2026, 10, 19),  # Pupil free day
-    date(2026, 11, 11),  # Veterans Day
-    date(2026, 11, 23), date(2026, 11, 24), date(2026, 11, 25),
-    date(2026, 11, 26), date(2026, 11, 27),  # Thanksgiving break
+    date(2026, 9, 7): "Labor Day",
+    date(2026, 10, 19): "Pupil Free Day",
+    date(2026, 11, 11): "Veterans Day",
+    date(2026, 11, 23): "Thanksgiving Break",
+    date(2026, 11, 24): "Thanksgiving Break",
+    date(2026, 11, 25): "Thanksgiving Break",
+    date(2026, 11, 26): "Thanksgiving",
+    date(2026, 11, 27): "Thanksgiving Break",
     # Winter break is covered by FALL_SEMESTER_END / SPRING_SEMESTER_START.
-    date(2027, 1, 18),   # MLK Jr. Day
-    date(2027, 2, 12),   # Lincoln's Birthday
-    date(2027, 2, 15),   # Presidents' Day
-    date(2027, 3, 29), date(2027, 3, 30), date(2027, 3, 31),
-    date(2027, 4, 1), date(2027, 4, 2), date(2027, 4, 5),  # Spring break
-    date(2027, 5, 31),   # Memorial Day
+    date(2027, 1, 18): "Martin Luther King Jr. Day",
+    date(2027, 2, 12): "Lincoln's Birthday",
+    date(2027, 2, 15): "Presidents' Day",
+    date(2027, 3, 29): "Spring Break",
+    date(2027, 3, 30): "Spring Break",
+    date(2027, 3, 31): "Spring Break",
+    date(2027, 4, 1): "Spring Break",
+    date(2027, 4, 2): "Spring Break",
+    date(2027, 4, 5): "Spring Break",
+    date(2027, 5, 31): "Memorial Day",
 }
-# These dates also filter the REAL menu: the district's data sometimes lists
-# food on a closed day (Veterans Day 2026 did), so a menu day on this list is
-# dropped rather than published.
+# These dates also override the REAL menu: the district's data sometimes lists
+# food on a closed day (Veterans Day 2026 did), so each date here is published
+# as "No School — <label>" instead, reusing the date's UID so it replaces any
+# lunch event already on parents' calendars in place.
 
 # Rides on every event's notes so any copy a subscriber re-shares (e.g. Google
 # Calendar's "make public") still carries our brand + the school-donation ask.
@@ -570,6 +578,17 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", cal
         new_events[date_str] = build_event(
             date_str, event_uid(date_str), now,
             title, build_menu_description(items, day_date, menu_id),
+        )
+
+    # No-school days in this month get a clear "No School" event.
+    for day_date, label in NO_SCHOOL_DATES.items():
+        if (day_date.month, day_date.year) != (month, year):
+            continue
+        date_str = day_date.strftime("%Y%m%d")
+        new_events[date_str] = build_event(
+            date_str, event_uid(date_str), now,
+            prefix + f"No School — {label}",
+            ics_escape(f"No school today ({label}), per the LCUSD calendar.\n\n{ATTRIBUTION}"),
         )
 
     # Merge: new month overrides any existing events for same dates
