@@ -78,20 +78,18 @@ LAST_DAY = date(2027, 6, 3)
 FALL_SEMESTER_END = date(2026, 12, 18)
 SPRING_SEMESTER_START = date(2027, 1, 5)
 
-# Known no-school weekdays. The verified calendar row only records semester
-# boundaries, so this list is incomplete — holidays inside a month (Thanksgiving,
-# MLK, spring break) are NOT all here yet. That is tolerable because a
-# placeholder is cleared the moment the real menu publishes, and it only ever
-# claims "not posted yet" rather than asserting lunch is served. Fill in from the
-# district calendar when convenient.
+# Known no-school weekdays inside the semesters, checked against the official
+# LCUSD Elementary School Calendar 2026-2027 (legal holidays, pupil free days,
+# school breaks) on 2026-11-13. UPDATE EACH YEAR.
 NO_SCHOOL_DATES = {
     date(2026, 9, 7),    # Labor Day
-    date(2026, 10, 19),  # Teacher work day
+    date(2026, 10, 19),  # Pupil free day
     date(2026, 11, 11),  # Veterans Day
     date(2026, 11, 23), date(2026, 11, 24), date(2026, 11, 25),
     date(2026, 11, 26), date(2026, 11, 27),  # Thanksgiving break
     # Winter break is covered by FALL_SEMESTER_END / SPRING_SEMESTER_START.
     date(2027, 1, 18),   # MLK Jr. Day
+    date(2027, 2, 12),   # Lincoln's Birthday
     date(2027, 2, 15),   # Presidents' Day
     date(2027, 3, 29), date(2027, 3, 30), date(2027, 3, 31),
     date(2027, 4, 1), date(2027, 4, 2), date(2027, 4, 5),  # Spring break
