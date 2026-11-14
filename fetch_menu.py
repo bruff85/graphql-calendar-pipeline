@@ -86,8 +86,20 @@ SPRING_SEMESTER_START = date(2027, 1, 5)
 # district calendar when convenient.
 NO_SCHOOL_DATES = {
     date(2026, 9, 7),    # Labor Day
+    date(2026, 10, 19),  # Teacher work day
     date(2026, 11, 11),  # Veterans Day
+    date(2026, 11, 23), date(2026, 11, 24), date(2026, 11, 25),
+    date(2026, 11, 26), date(2026, 11, 27),  # Thanksgiving break
+    # Winter break is covered by FALL_SEMESTER_END / SPRING_SEMESTER_START.
+    date(2027, 1, 18),   # MLK Jr. Day
+    date(2027, 2, 15),   # Presidents' Day
+    date(2027, 3, 29), date(2027, 3, 30), date(2027, 3, 31),
+    date(2027, 4, 1), date(2027, 4, 2), date(2027, 4, 5),  # Spring break
+    date(2027, 5, 31),   # Memorial Day
 }
+# These dates also filter the REAL menu: the district's data sometimes lists
+# food on a closed day (Veterans Day 2026 did), so a menu day on this list is
+# dropped rather than published.
 
 # Rides on every event's notes so any copy a subscriber re-shares (e.g. Google
 # Calendar's "make public") still carries our brand + the school-donation ask.
@@ -543,6 +555,9 @@ def generate_ics(daily_menu, month, year, existing_ics_path=None, prefix="", cal
             if is_placeholder(event_block) and (event_date.month, event_date.year) == (month, year):
                 dropped_placeholders += 1
                 continue
+            # An event already published on a no-school day is dropped too.
+            if event_date in NO_SCHOOL_DATES:
+                continue
             existing_events[date_str] = event_block
         print(f"  Retaining {len(existing_events)} events within the 2-month window.")
         if dropped_placeholders:
@@ -786,6 +801,10 @@ def main():
     print(f"\nGenerating ICS for: {month_label}")
 
     daily_menu = build_daily_menu(target_menu)
+    closed = sorted(d for d in daily_menu if d in NO_SCHOOL_DATES)
+    for d in closed:
+        print(f"  Dropping menu on no-school day {d} ({' | '.join(daily_menu[d])})")
+        del daily_menu[d]
     print(f"Menu items found for {len(daily_menu)} school days")
 
     os.makedirs("docs", exist_ok=True)
